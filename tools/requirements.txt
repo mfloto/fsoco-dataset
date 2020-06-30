@@ -1,0 +1,4 @@
+pre-commit
+black
+flake8
+-e . # install package in editable mode

@@ -1,0 +1,11 @@
+[flake8]
+# rather than using the flake8 default of 79:
+max-line-length = 80
+extend-ignore =
+    # See https://github.com/PyCQA/pycodestyle/issues/373
+       E203, # E203 whitespace before ':' 
+select = C,E,F,W,B,B950
+ignore = E203, E501, W503 
+# E203 Whitespace before ':' (E203) https://www.flake8rules.com/rules/E203.html
+# E501 Line too long (82 &gt; 79 characters) (E501) https://www.flake8rules.com/rules/E501.html
+# W503 Line break occurred before a binary operator (W503) https://www.flake8rules.com/rules/W503.html

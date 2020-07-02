@@ -1,6 +1,6 @@
 # SITE CONFIGURATION
-baseurl: "/fsocov2_prototyping"
-url: "https://vniclas.github.io"
+baseurl: "/fsoco-dataset"
+url: "https://fsoco.github.io"
 
 # THEME-SPECIFIC CONFIGURATION
 title: FSOCO                                            # site's title

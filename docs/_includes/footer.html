@@ -7,6 +7,26 @@
                 {% include icons.html %}
                 </ul>
             </div>
+    <!-- Menu -->
+    <nav class="clear">
+    <ul class="hide">
+        {% assign name_page = "" %}
+        {% assign pages = site.pages | sort:"order"  %}
+
+        {% for page in pages %}
+            {% if page.footer_link %}
+            <li class="separator"> | </li>
+            <li>
+                <a class="clear" aria-label="{{ page.title }}" title="{{ page.title }}" href="{{ page.url | relative_url }}">
+                    {% if page.icon %} <i class="fa {{ page.icon }}" aria-hidden="true"></i>
+                    {% else %} {{ page.title }} {% endif%}
+                </a>
+            </li>
+            {% endif %}
+            {% assign name_page = page.title | append: name_page %}
+        {% endfor %}
+    </ul>
+    </nav>
 </footer>
 
 

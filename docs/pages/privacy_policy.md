@@ -8,4 +8,3 @@ footer_link: true
 
 # Privacy Policy Placeholder
 
-<!-- {% include privacy_policy.html %} -->

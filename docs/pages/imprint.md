@@ -8,4 +8,4 @@ footer_link: true
 
 # Imprint Placeholder
 
-<!-- {% include imprint.html %} -->
+

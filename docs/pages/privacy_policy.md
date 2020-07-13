@@ -22,7 +22,7 @@ You directly provide us with the data we collect. We collect data and process da
 
 ### How will we use your data?
 
-We collects your data so that we can:
+We collect your data so that we can:
 
     Process your contribution request to the FSOCO dataset.
     Communicate with you regarding the contribution request mentioned above.
@@ -37,17 +37,17 @@ We will keep your contact information indefinitely, or until you request us to d
 
 We would like to make sure you are fully aware of all of your data protection rights. Every user is entitled to the following:
 
-- The right to access – You have the right to request We for copies of your personal data. We may charge you a small fee for this service.
+- The right to access – You have the right to request copies of your personal data from us. We may charge you a small fee for this service.
 
-- The right to rectification – You have the right to request that We correct any information you believe is inaccurate. You also have the right to request We to complete the information you believe is incomplete.
+- The right to rectification – You have the right to request that we correct any information you believe is inaccurate. You also have the right to request us to complete the information you believe is incomplete.
 
-- The right to erasure – You have the right to request that We erase your personal data, under certain conditions.
+- The right to erasure – You have the right to request that we erase your personal data under certain conditions.
 
-- The right to restrict processing – You have the right to request that We restrict the processing of your personal data, under certain conditions.
+- The right to restrict processing – You have the right to request that we restrict the processing of your personal data under certain conditions.
 
-- The right to object to processing – You have the right to object to We’s processing of your personal data, under certain conditions.
+- The right to object to processing – You have the right to object to our processing of your personal data under certain conditions.
 
-- The right to data portability – You have the right to request that We transfer the data that we have collected to another organization, or directly to you, under certain conditions.
+- The right to data portability – You have the right to request that we transfer the data that we have collected to another organization, or directly to you, under certain conditions.
 
 If you make a request, we have one month to respond to you. If you would like to exercise any of these rights, please contact us at our email:
 
@@ -66,7 +66,7 @@ Our website contains links to other websites. Our privacy policy applies only to
 
 ______
 ### Updates
-We keeps this privacy policy under regular review and place any updates on this web page. This privacy policy was last updated on July 12<sup>th</sup> of 2020.
+We keep this privacy policy under regular review and place any updates on this web page. This privacy policy was last updated on July 12<sup>th</sup> of 2020.
 
 ### How to contact us
 

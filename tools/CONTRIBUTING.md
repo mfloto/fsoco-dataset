@@ -221,7 +221,7 @@ For those more visually inclined:
 After contributing to the project, if you wish to be added as a contributor, follow these steps:
 1. Mention All-Contributors bot in a comment in the issue your PR is linked to and state your contribution (see commands in table below)
 1. In the PR created by the bot, reference the issue your contribution PR solved
-1. Address requests by reviewer, if anything's unclear 
+1. Address requests by reviewer, if anything is unclear 
 
 | Contribution Type | Emoji | Bot command                                                      |
 |-------------------|-------|------------------------------------------------------------------|

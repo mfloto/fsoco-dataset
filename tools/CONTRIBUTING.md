@@ -229,7 +229,7 @@ After contributing to the project, if you wish to be added as a contributor, fol
 | Documentation     | 📖     | @all-contributors  please add  @your_user_name for documentation |
 | Tools             | 🔧     | @all-contributors  please add  @your_user_name for tools         |
 
-See the [All-Contributors project page](https://allcontributors.org/docs/en/overview), if you're interested in how the bot works.
+See the [All-Contributors project page](https://allcontributors.org/docs/en/overview), if you are interested in how the bot works.
 
 ### <a name="style"></a> Styleguides
 #### <a name="pep"></a> [PEP 8](https://www.python.org/dev/peps/pep-0008/)

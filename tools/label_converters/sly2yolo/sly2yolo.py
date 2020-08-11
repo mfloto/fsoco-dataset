@@ -27,7 +27,9 @@ def export_image(darknet_export_images_dir: Path, src_file: Path, new_file_name:
     os.rename(dst_file, new_dst_file_name)
 
 
-def convert_object_entry(obj: dict, image_width: float, image_height: float, class_id_mapping: dict):
+def convert_object_entry(
+    obj: dict, image_width: float, image_height: float, class_id_mapping: dict
+):
     class_title = obj["classTitle"]
 
     class_id = class_id_mapping[class_title]
@@ -54,10 +56,13 @@ def convert_object_entry(obj: dict, image_width: float, image_height: float, cla
     assert 0 <= norm_bb_width <= 1
     assert 0 <= norm_bb_height <= 1
 
-    return  class_id, norm_x, norm_y, norm_bb_width, norm_bb_height
+    return class_id, norm_x, norm_y, norm_bb_width, norm_bb_height
+
 
 def main(sly_project_path: str, output_path: str):
-    class_id_mapping = {name: id for id, name in enumerate(fsoco_classes(segmentation=False))}
+    class_id_mapping = {
+        name: id for id, name in enumerate(fsoco_classes(segmentation=False))
+    }
 
     sly_base = Path(sly_project_path)
     darknet_export_base = Path(output_path)
@@ -72,6 +77,7 @@ def main(sly_project_path: str, output_path: str):
     num_labeled_images = 0
 
     for label in labels:
+        name = label.stem
         image = Path(str(label).replace("/ann/", "/img/").replace(".json", ""))
 
         with open(label) as json_file:
@@ -83,26 +89,34 @@ def main(sly_project_path: str, output_path: str):
                 image_width = data["size"]["width"]
                 image_height = data["size"]["height"]
 
-                export_image(darknet_export_images_dir, image, "{:04d}.png".format(num_labeled_images))
-                label_file_name = darknet_export_labels_dir/"{:04d}.txt".format(num_labeled_images)
+                export_image(darknet_export_images_dir, image, name)
+                label_file_name = darknet_export_labels_dir / f"{name}.txt"
 
                 with open(label_file_name, "w") as darknet_label:
 
                     for obj in data["objects"]:
-                        class_id, norm_x, norm_y, norm_bb_width, norm_bb_height = convert_object_entry(obj,
-                                                                                                       image_height=image_height,
-                                                                                                       image_width=image_width,
-                                                                                                       class_id_mapping=class_id_mapping)
+                        (
+                            class_id,
+                            norm_x,
+                            norm_y,
+                            norm_bb_width,
+                            norm_bb_height,
+                        ) = convert_object_entry(
+                            obj,
+                            image_height=image_height,
+                            image_width=image_width,
+                            class_id_mapping=class_id_mapping,
+                        )
 
-                        darknet_label.write("{} {} {} {} {}\n".format(class_id,
-                                                                    norm_x,
-                                                                    norm_y,
-                                                                    norm_bb_width,
-                                                                    norm_bb_height))
+                        darknet_label.write(
+                            "{} {} {} {} {}\n".format(
+                                class_id, norm_x, norm_y, norm_bb_width, norm_bb_height
+                            )
+                        )
 
     # write class id mapping
 
-    with open(darknet_export_base/"classes.txt", "w") as class_info_file:
+    with open(darknet_export_base / "classes.txt", "w") as class_info_file:
 
         for class_name, id in sorted(class_id_mapping.items(), key=lambda kv: kv[1]):
             class_info_file.write("{}\n".format(class_name))
@@ -112,21 +126,19 @@ def main(sly_project_path: str, output_path: str):
     print("Number of exported Images: {} ".format(num_labeled_images))
     print(class_counter)
 
-    with open(darknet_export_base/"stats.txt", "w") as class_stat_file:
+    with open(darknet_export_base / "stats.txt", "w") as class_stat_file:
 
         class_stat_file.write("Number of images: {}\n\n".format(num_labeled_images))
         class_stat_file.write("Objects per class:\n")
 
         total_num_objects = 0
 
-        for class_name, count in sorted(class_counter.items(), key=lambda kv: kv[1], reverse=True):
+        for class_name, count in sorted(
+            class_counter.items(), key=lambda kv: kv[1], reverse=True
+        ):
             total_num_objects += count
             class_stat_file.write("{} -> {}\n".format(class_name, count))
 
-        class_stat_file.write("\nTotal number of objects: {}\n".format(total_num_objects))
-
-
-
-
-
-
+        class_stat_file.write(
+            "\nTotal number of objects: {}\n".format(total_num_objects)
+        )

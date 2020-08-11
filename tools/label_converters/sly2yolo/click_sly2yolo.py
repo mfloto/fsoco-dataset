@@ -6,9 +6,7 @@ from .sly2yolo import main
 @click.command()
 @click.argument("sly_project_folder", type=str)
 @click.argument("output_folder", type=str)
-def sly2yolo(
-        sly_project_folder, output_folder
-):
+def sly2yolo(sly_project_folder, output_folder):
     """
      Supervisely  => Darknet YOLO format
 

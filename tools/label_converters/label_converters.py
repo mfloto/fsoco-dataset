@@ -2,6 +2,7 @@ import click
 
 from label_converters.labelbox2sly.click_labelbox2sly import labelbox2sly
 from label_converters.yolo2sly.click_yolo2sly import yolo2sly
+from label_converters.sly2yolo.click_sly2yolo import sly2yolo
 
 
 @click.group()
@@ -18,6 +19,7 @@ def label_converters():
 
 
 label_converters.add_command(yolo2sly)
+label_converters.add_command(sly2yolo)
 label_converters.add_command(labelbox2sly, name="lb2sly")
 
 if __name__ == "__main__":

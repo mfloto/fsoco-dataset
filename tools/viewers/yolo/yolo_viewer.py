@@ -110,7 +110,7 @@ def handle_image(label_file: Path, image_file: Path, index: int, total: int):
 
     cv2.putText(
         image,
-        f"press 'n' for next | 'p' for previous | 'q' for quit",
+        "press 'n' for next | 'p' for previous | 'q' for quit",
         (20, 30),
         CV_FONT,
         1.0,

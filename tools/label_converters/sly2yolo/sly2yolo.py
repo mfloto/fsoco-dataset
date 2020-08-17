@@ -66,9 +66,43 @@ def convert_object_entry(
     return class_id, norm_x, norm_y, norm_bb_width, norm_bb_height
 
 
+def write_meta_data(
+    darknet_export_base: Path, class_id_mapping: dict, num_labeled_images: int
+):
+    # write class id mapping
+
+    with open(darknet_export_base / "classes.txt", "w") as class_info_file:
+
+        for class_name, _ in sorted(class_id_mapping.items(), key=lambda kv: kv[1]):
+            class_info_file.write("{}\n".format(class_name))
+
+    # write stats
+
+    print("Number of exported Images: {} ".format(num_labeled_images))
+    print(class_counter)
+
+    with open(darknet_export_base / "stats.txt", "w") as class_stat_file:
+
+        class_stat_file.write("Number of images: {}\n\n".format(num_labeled_images))
+        class_stat_file.write("Objects per class:\n")
+
+        total_num_objects = 0
+
+        for class_name, count in sorted(
+            class_counter.items(), key=lambda kv: kv[1], reverse=True
+        ):
+            total_num_objects += count
+            class_stat_file.write("{} -> {}\n".format(class_name, count))
+
+        class_stat_file.write(
+            "\nTotal number of objects: {}\n".format(total_num_objects)
+        )
+
+
 def main(sly_project_path: str, output_path: str):
     class_id_mapping = {
-        name: id for id, name in enumerate(fsoco_classes(segmentation=False))
+        name: darknet_id
+        for darknet_id, name in enumerate(fsoco_classes(segmentation=False))
     }
 
     sly_base = Path(sly_project_path)
@@ -130,22 +164,4 @@ def main(sly_project_path: str, output_path: str):
                                 f"[Warning] Failed to convert object entry in {label_file_name} \n -> {e}"
                             )
 
-    print("Number of exported Images: {} ".format(num_labeled_images))
-    print(class_counter)
-
-    with open(darknet_export_base / "stats.txt", "w") as class_stat_file:
-
-        class_stat_file.write("Number of images: {}\n\n".format(num_labeled_images))
-        class_stat_file.write("Objects per class:\n")
-
-        total_num_objects = 0
-
-        for class_name, count in sorted(
-            class_counter.items(), key=lambda kv: kv[1], reverse=True
-        ):
-            total_num_objects += count
-            class_stat_file.write("{} -> {}\n".format(class_name, count))
-
-        class_stat_file.write(
-            "\nTotal number of objects: {}\n".format(total_num_objects)
-        )
+    write_meta_data(darknet_export_base, class_id_mapping, num_labeled_images)

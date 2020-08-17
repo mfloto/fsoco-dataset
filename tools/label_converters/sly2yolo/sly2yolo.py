@@ -10,7 +10,7 @@ import tqdm
 from functools import partial
 
 from ..helpers import fsoco_classes
-from tools.watermark.watermark import FSOCO_IMPORT_BORDER_THICKNESS
+from watermark.watermark import FSOCO_IMPORT_BORDER_THICKNESS
 
 
 def clean_export_dir(darknet_export_images_dir: Path, darknet_export_labels_dir: Path):

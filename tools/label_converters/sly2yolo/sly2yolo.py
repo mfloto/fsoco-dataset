@@ -3,6 +3,7 @@ import json
 from collections import defaultdict
 import os
 import shutil
+import click
 
 from ..helpers import fsoco_classes
 
@@ -51,10 +52,16 @@ def convert_object_entry(
     norm_bb_width = bb_width / image_width
     norm_bb_height = bb_height / image_height
 
-    assert 0 <= norm_x <= 1
-    assert 0 <= norm_y <= 1
-    assert 0 <= norm_bb_width <= 1
-    assert 0 <= norm_bb_height <= 1
+    if not (
+        (0 <= norm_x <= 1)
+        or (0 <= norm_y <= 1)
+        or (0 <= norm_bb_width <= 1)
+        or (0 <= norm_bb_height <= 1)
+    ):
+        raise RuntimeWarning(
+            f"Normalized bounding box values outside the valid range! "
+            f"x = {norm_x}; y = {norm_y}; w = {norm_bb_width}; h = {norm_bb_height}"
+        )
 
     return class_id, norm_x, norm_y, norm_bb_width, norm_bb_height
 
@@ -95,33 +102,33 @@ def main(sly_project_path: str, output_path: str):
                 with open(label_file_name, "w") as darknet_label:
 
                     for obj in data["objects"]:
-                        (
-                            class_id,
-                            norm_x,
-                            norm_y,
-                            norm_bb_width,
-                            norm_bb_height,
-                        ) = convert_object_entry(
-                            obj,
-                            image_height=image_height,
-                            image_width=image_width,
-                            class_id_mapping=class_id_mapping,
-                        )
-
-                        darknet_label.write(
-                            "{} {} {} {} {}\n".format(
-                                class_id, norm_x, norm_y, norm_bb_width, norm_bb_height
+                        try:
+                            (
+                                class_id,
+                                norm_x,
+                                norm_y,
+                                norm_bb_width,
+                                norm_bb_height,
+                            ) = convert_object_entry(
+                                obj,
+                                image_height=image_height,
+                                image_width=image_width,
+                                class_id_mapping=class_id_mapping,
                             )
-                        )
 
-    # write class id mapping
-
-    with open(darknet_export_base / "classes.txt", "w") as class_info_file:
-
-        for class_name, id in sorted(class_id_mapping.items(), key=lambda kv: kv[1]):
-            class_info_file.write("{}\n".format(class_name))
-
-    # write stats
+                            darknet_label.write(
+                                "{} {} {} {} {}\n".format(
+                                    class_id,
+                                    norm_x,
+                                    norm_y,
+                                    norm_bb_width,
+                                    norm_bb_height,
+                                )
+                            )
+                        except RuntimeWarning as e:
+                            click.echo(
+                                f"[Warning] Failed to convert object entry in {label_file_name} \n -> {e}"
+                            )
 
     print("Number of exported Images: {} ".format(num_labeled_images))
     print(class_counter)

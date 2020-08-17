@@ -13,7 +13,7 @@ def yolo(input_folder, sample_size):
     \b
 
     This viewer allows you to visualize labels in Darknet YOLO format.
-    Specify -sample_size [0.0-1.0] to only show only a smaller subset of all labels.
+    Specify -sample_size [0.0-1.0] to only show a smaller subset of all labels.
 
     \b
     Input:

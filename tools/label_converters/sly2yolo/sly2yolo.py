@@ -4,11 +4,13 @@ from collections import defaultdict
 import os
 import shutil
 import click
+import cv2 as cv
+from multiprocessing import Pool
+import tqdm
+from functools import partial
 
 from ..helpers import fsoco_classes
-
-# Class counter
-class_counter = defaultdict(int)
+from tools.watermark.watermark import FSOCO_IMPORT_BORDER_THICKNESS
 
 
 def clean_export_dir(darknet_export_images_dir: Path, darknet_export_labels_dir: Path):
@@ -18,27 +20,62 @@ def clean_export_dir(darknet_export_images_dir: Path, darknet_export_labels_dir:
     darknet_export_labels_dir.mkdir(parents=True)
 
 
-def export_image(darknet_export_images_dir: Path, src_file: Path, new_file_name: str):
-    old_file_name = src_file.name
-    dst_dir = darknet_export_images_dir
-    shutil.copy(str(src_file), dst_dir)
+def export_image(
+    darknet_export_images_dir: Path,
+    src_file: Path,
+    new_file_name: str,
+    remove_watermark: bool,
+):
+    if remove_watermark:
+        rescale_copy_image(darknet_export_images_dir, src_file, new_file_name)
+    else:
+        copy_image(darknet_export_images_dir, src_file, new_file_name)
 
-    dst_file = os.path.join(dst_dir, old_file_name)
-    new_dst_file_name = os.path.join(dst_dir, new_file_name)
+
+def copy_image(darknet_export_images_dir: Path, src_file: Path, new_file_name: str):
+    old_file_name = src_file.name
+    shutil.copy(src_file, darknet_export_images_dir)
+
+    dst_file = darknet_export_images_dir / old_file_name
+    new_dst_file_name = darknet_export_images_dir / new_file_name
     os.rename(dst_file, new_dst_file_name)
 
 
+def rescale_copy_image(
+    darknet_export_images_dir: Path, src_file: Path, new_file_name: str
+):
+    image = cv.imread(str(src_file))
+    cropped_image = image[
+        FSOCO_IMPORT_BORDER_THICKNESS:-FSOCO_IMPORT_BORDER_THICKNESS,
+        FSOCO_IMPORT_BORDER_THICKNESS:-FSOCO_IMPORT_BORDER_THICKNESS,
+        :,
+    ]
+
+    new_dst_file_name = darknet_export_images_dir / new_file_name
+    cv.imwrite(str(new_dst_file_name), cropped_image)
+
+
 def convert_object_entry(
-    obj: dict, image_width: float, image_height: float, class_id_mapping: dict
+    obj: dict,
+    image_width: float,
+    image_height: float,
+    class_id_mapping: dict,
+    remove_watermark: bool,
 ):
     class_title = obj["classTitle"]
-
     class_id = class_id_mapping[class_title]
-
-    class_counter[class_title] += 1
 
     left, top = obj["points"]["exterior"][0]
     right, bottom = obj["points"]["exterior"][1]
+
+    if remove_watermark:
+        left -= FSOCO_IMPORT_BORDER_THICKNESS
+        top -= FSOCO_IMPORT_BORDER_THICKNESS
+        right -= FSOCO_IMPORT_BORDER_THICKNESS
+        bottom -= FSOCO_IMPORT_BORDER_THICKNESS
+
+        image_width -= 2 * FSOCO_IMPORT_BORDER_THICKNESS
+        image_height -= 2 * FSOCO_IMPORT_BORDER_THICKNESS
 
     mid_x = (left + right) / 2
     mid_y = (top + bottom) / 2
@@ -63,11 +100,14 @@ def convert_object_entry(
             f"x = {norm_x}; y = {norm_y}; w = {norm_bb_width}; h = {norm_bb_height}"
         )
 
-    return class_id, norm_x, norm_y, norm_bb_width, norm_bb_height
+    return class_id, class_title, norm_x, norm_y, norm_bb_width, norm_bb_height
 
 
 def write_meta_data(
-    darknet_export_base: Path, class_id_mapping: dict, num_labeled_images: int
+    darknet_export_base: Path,
+    class_id_mapping: dict,
+    num_labeled_images: int,
+    class_counter: dict,
 ):
     # write class id mapping
 
@@ -79,7 +119,11 @@ def write_meta_data(
     # write stats
 
     print("Number of exported Images: {} ".format(num_labeled_images))
-    print(class_counter)
+
+    for class_name, count in sorted(
+        class_counter.items(), key=lambda kv: kv[1], reverse=True
+    ):
+        print(f"{class_name} -> {count}")
 
     with open(darknet_export_base / "stats.txt", "w") as class_stat_file:
 
@@ -99,7 +143,63 @@ def write_meta_data(
         )
 
 
-def main(sly_project_path: str, output_path: str):
+def convert_label(
+    darknet_export_images_dir: Path,
+    darknet_export_labels_dir: Path,
+    class_id_mapping: dict,
+    remove_watermark: bool,
+    label: Path,
+):
+    class_counter = defaultdict(int)
+    name = label.stem
+    image = Path(str(label).replace("/ann/", "/img/").replace(".json", ""))
+
+    with open(label) as json_file:
+        data = json.load(json_file)
+
+        if len(data["objects"]) > 0:
+
+            image_width = data["size"]["width"]
+            image_height = data["size"]["height"]
+
+            export_image(darknet_export_images_dir, image, name, remove_watermark)
+            label_file_name = darknet_export_labels_dir / f"{name}.txt"
+
+            with open(label_file_name, "w") as darknet_label:
+
+                for obj in data["objects"]:
+                    try:
+                        (
+                            class_id,
+                            class_title,
+                            norm_x,
+                            norm_y,
+                            norm_bb_width,
+                            norm_bb_height,
+                        ) = convert_object_entry(
+                            obj,
+                            image_height=image_height,
+                            image_width=image_width,
+                            class_id_mapping=class_id_mapping,
+                            remove_watermark=remove_watermark,
+                        )
+
+                        class_counter[class_title] += 1
+
+                        darknet_label.write(
+                            "{} {} {} {} {}\n".format(
+                                class_id, norm_x, norm_y, norm_bb_width, norm_bb_height,
+                            )
+                        )
+                    except RuntimeWarning as e:
+                        click.echo(
+                            f"[Warning] Failed to convert object entry in {label_file_name} \n -> {e}"
+                        )
+
+    return class_counter
+
+
+def main(sly_project_path: str, output_path: str, remove_watermark: bool):
     class_id_mapping = {
         name: darknet_id
         for darknet_id, name in enumerate(fsoco_classes(segmentation=False))
@@ -115,53 +215,23 @@ def main(sly_project_path: str, output_path: str):
 
     clean_export_dir(darknet_export_images_dir, darknet_export_labels_dir)
 
-    num_labeled_images = 0
+    convert_func = partial(
+        convert_label,
+        darknet_export_images_dir,
+        darknet_export_labels_dir,
+        class_id_mapping,
+        remove_watermark,
+    )
 
-    for label in labels:
-        name = label.stem
-        image = Path(str(label).replace("/ann/", "/img/").replace(".json", ""))
+    global_class_counter = defaultdict(int)
 
-        with open(label) as json_file:
-            data = json.load(json_file)
+    with Pool() as p:
+        for class_counter in tqdm.tqdm(
+            p.imap_unordered(convert_func, labels), total=len(labels)
+        ):
+            for class_name, count in class_counter.items():
+                global_class_counter[class_name] += count
 
-            if len(data["objects"]) > 0:
-                num_labeled_images += 1
-
-                image_width = data["size"]["width"]
-                image_height = data["size"]["height"]
-
-                export_image(darknet_export_images_dir, image, name)
-                label_file_name = darknet_export_labels_dir / f"{name}.txt"
-
-                with open(label_file_name, "w") as darknet_label:
-
-                    for obj in data["objects"]:
-                        try:
-                            (
-                                class_id,
-                                norm_x,
-                                norm_y,
-                                norm_bb_width,
-                                norm_bb_height,
-                            ) = convert_object_entry(
-                                obj,
-                                image_height=image_height,
-                                image_width=image_width,
-                                class_id_mapping=class_id_mapping,
-                            )
-
-                            darknet_label.write(
-                                "{} {} {} {} {}\n".format(
-                                    class_id,
-                                    norm_x,
-                                    norm_y,
-                                    norm_bb_width,
-                                    norm_bb_height,
-                                )
-                            )
-                        except RuntimeWarning as e:
-                            click.echo(
-                                f"[Warning] Failed to convert object entry in {label_file_name} \n -> {e}"
-                            )
-
-    write_meta_data(darknet_export_base, class_id_mapping, num_labeled_images)
+    write_meta_data(
+        darknet_export_base, class_id_mapping, len(labels), global_class_counter
+    )

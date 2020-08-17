@@ -4,9 +4,9 @@ from .yolo_viewer import main
 
 
 @click.command()
-@click.argument("input_folders", type=str, nargs=-1)
+@click.argument("input_folder", type=str)
 @click.option("-sample_size", type=click.FloatRange(0.0, 1.0), default=1.0)
-def yolo(input_folders, sample_size):
+def yolo(input_folder, sample_size):
     """
     Darknet YOLO label viewer
 
@@ -30,7 +30,7 @@ def yolo(input_folders, sample_size):
 
     """
     click.echo("[LOG] Running Darknet Yolo label viewer")
-    main(input_folders, sample_size)
+    main(input_folder, sample_size)
 
 
 if __name__ == "__main__":

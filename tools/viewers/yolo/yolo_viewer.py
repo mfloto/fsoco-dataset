@@ -154,8 +154,6 @@ def get_screen_size():
             screen_height = m.height - HEIGHT_MARGIN
 
 
-def main(input_folders: list, sample_size: float):
+def main(input_folder: str, sample_size: float):
     get_screen_size()
-
-    for folder in input_folders:
-        handle_folder(Path(folder), sample_size=sample_size)
+    handle_folder(Path(input_folder), sample_size=sample_size)

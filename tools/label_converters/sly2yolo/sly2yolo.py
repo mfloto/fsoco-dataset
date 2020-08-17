@@ -9,7 +9,7 @@ from multiprocessing import Pool
 import tqdm
 from functools import partial
 
-from ..helpers import fsoco_classes
+from ..helpers import fsoco_to_class_id_mapping
 from watermark.watermark import FSOCO_IMPORT_BORDER_THICKNESS
 
 
@@ -200,10 +200,7 @@ def convert_label(
 
 
 def main(sly_project_path: str, output_path: str, remove_watermark: bool):
-    class_id_mapping = {
-        name: darknet_id
-        for darknet_id, name in enumerate(fsoco_classes(segmentation=False))
-    }
+    class_id_mapping = fsoco_to_class_id_mapping()
 
     sly_base = Path(sly_project_path)
     darknet_export_base = Path(output_path)

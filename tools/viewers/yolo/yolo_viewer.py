@@ -105,14 +105,6 @@ def handle_image(label_file: Path, image_file: Path, index: int, total: int):
     canvas = np.zeros((new_height + HEADER_HEIGHT, new_width, 3), np.uint8)
     canvas[HEADER_HEIGHT:, :, :] = resized_image
 
-    # and info
-
-    # overlay = image.copy()
-    # x, y, w, h = 0, 0, new_width, HEADER_HEIGHT
-    # cv2.rectangle(overlay, (x, y), (x + w, y + h), (20, 20, 20), -1)
-    # alpha = 0.8
-    # image = cv2.addWeighted(overlay, alpha, image, 1 - alpha, 0)
-
     cv2.putText(
         canvas,
         "press 'n' for next | 'p' for previous | 'q' for quit",

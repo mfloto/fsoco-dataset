@@ -6,6 +6,7 @@ import math
 import cv2
 from random import shuffle
 from screeninfo import get_monitors
+import numpy as np
 
 ID_TO_COLOR = {
     "0": (0, 255, 255),  # yellow
@@ -21,8 +22,9 @@ LABELS_SUBDIR = "labels"
 
 CV_FONT = cv2.FONT_HERSHEY_SIMPLEX
 
-HEIGHT_MARGIN = 130
+HEIGHT_MARGIN = 180
 WIDTH_MARGIN = 20
+HEADER_HEIGHT = 85
 
 screen_width = 0
 screen_height = 0
@@ -87,7 +89,6 @@ def handle_image(label_file: Path, image_file: Path, index: int, total: int):
             cv2.rectangle(image, (x, y), (x + w, y + h), color, 2)
 
     # rescale to fit screen
-
     ratio = image_width / image_height
 
     new_width = int(screen_width)
@@ -97,18 +98,23 @@ def handle_image(label_file: Path, image_file: Path, index: int, total: int):
         new_width = int(screen_height * ratio)
         new_height = int(screen_height)
 
-    image = cv2.resize(image, (new_width, new_height), interpolation=cv2.INTER_AREA)
+    resized_image = cv2.resize(
+        image, (new_width, new_height), interpolation=cv2.INTER_AREA
+    )
+
+    canvas = np.zeros((new_height + HEADER_HEIGHT, new_width, 3), np.uint8)
+    canvas[HEADER_HEIGHT:, :, :] = resized_image
 
     # and info
 
-    overlay = image.copy()
-    x, y, w, h = 0, 0, new_width, 80
-    cv2.rectangle(overlay, (x, y), (x + w, y + h), (20, 20, 20), -1)
-    alpha = 0.8
-    image = cv2.addWeighted(overlay, alpha, image, 1 - alpha, 0)
+    # overlay = image.copy()
+    # x, y, w, h = 0, 0, new_width, HEADER_HEIGHT
+    # cv2.rectangle(overlay, (x, y), (x + w, y + h), (20, 20, 20), -1)
+    # alpha = 0.8
+    # image = cv2.addWeighted(overlay, alpha, image, 1 - alpha, 0)
 
     cv2.putText(
-        image,
+        canvas,
         "press 'n' for next | 'p' for previous | 'q' for quit",
         (20, 30),
         CV_FONT,
@@ -118,7 +124,7 @@ def handle_image(label_file: Path, image_file: Path, index: int, total: int):
     )
 
     cv2.putText(
-        image,
+        canvas,
         f"[{index + 1}/{total}] {image_file}",
         (20, 70),
         CV_FONT,
@@ -127,7 +133,7 @@ def handle_image(label_file: Path, image_file: Path, index: int, total: int):
         2,
     )
 
-    cv2.imshow("image", image)
+    cv2.imshow("image", canvas)
 
     action = ""
     while True:

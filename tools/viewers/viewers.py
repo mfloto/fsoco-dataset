@@ -7,7 +7,7 @@ from viewers.yolo.click_yolo_viewer import yolo
 def viewers():
     """
     Label Viewers
-
+\b
     The commands in this group help you visualize your labels.
     If you're interested in extending the available viewers, have a look at:
     https://github.com/fsoco/fsoco/blob/master/tools/CONTRIBUTING.md

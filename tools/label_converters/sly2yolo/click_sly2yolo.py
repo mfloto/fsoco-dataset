@@ -34,7 +34,6 @@ def sly2yolo(sly_project_folder, output_folder, remove_watermark):
 
     \b
     Output:
-
     output_folder
     ├──images_folder
        ├── img_x.jpeg

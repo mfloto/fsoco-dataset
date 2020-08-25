@@ -8,12 +8,11 @@ from random import shuffle
 from screeninfo import get_monitors
 
 ID_TO_COLOR = {
-    "0": (0, 255, 255),
-    "1": (255, 0, 0),
-    "2": (0, 165, 255),
-    "3": (0, 100, 255),
-    "4": (0, 0, 0),
-    "5": (0, 0, 0),
+    "0": (0, 255, 255),  # yellow
+    "1": (255, 0, 42),  # blue
+    "2": (0, 128, 255),  # orange
+    "3": (42, 0, 255),  # large orange
+    "4": (15, 219, 59),  # unknown
 }
 
 LABEL_FILE_EXTENSION = ".txt"

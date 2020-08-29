@@ -8,6 +8,7 @@ from label_converters.label_converters import label_converters
 from watermark.click_watermark import watermark
 from similarity_scorer.click_similarity_scorer import similarity_scorer
 from collect_stats.click_collect_stats import collect_stats
+from viewers.viewers import viewers
 
 
 class Tools(object):
@@ -49,6 +50,8 @@ fsoco.add_command(watermark)
 fsoco.add_command(similarity_scorer)
 # Add the collect stats click command to the fsoco group
 fsoco.add_command(collect_stats)
+# Add the label viewers click command to the fsoco group
+fsoco.add_command(viewers)
 
 
 if __name__ == "__main__":

@@ -44,6 +44,22 @@ def class_id_to_fsoco(class_id):
     return None
 
 
+def fsoco_to_class_id_mapping():
+    mapping = dict()
+    mapping_file = os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), "class_id_to_fsoco.yaml"
+    )
+    with open(mapping_file, "r") as f:
+        mapping_dict = yaml.full_load(f)
+    for class_name, class_ids in mapping_dict.items():
+        if isinstance(class_ids, int):
+            mapping[class_name] = class_ids
+        elif isinstance(class_ids, list):
+            # use only first id for backward mapping
+            mapping[class_name] = class_ids[0]
+    return mapping
+
+
 def naming_converter(name, convert_class=False, convert_tag=False):
     mapping_file = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), "names_to_fsoco.yaml"

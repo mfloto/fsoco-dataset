@@ -1,6 +1,6 @@
+import logging
 import argparse
-from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
+from bs4 import BeautifulSoup
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -9,21 +9,27 @@ parser.add_argument(
     type=str,
     action="store",
     required=True,
-    help="'file:///' path to the html file you want to prepare. Opening the local html file in your browser should give you a valid one.",
+    help="Path to the html file you want to use.",
+)
+parser.add_argument(
+    "-o",
+    "--output_file",
+    default="stats_for_nerds_bokeh.slides.html",
+    type=str,
+    action="store",
+    required=True,
+    help="Path to the output file descriptor.",
 )
 
 args = parser.parse_args()
 
-print(args.html_file)
+logging.info(f"Preparing slides notebook html file: {args.html_file}.")
 
-options = Options()
-options.headless = True
-driver = webdriver.Firefox(options=options)
-driver.get(args.html_file)
-slides_html = driver.find_element_by_tag_name("body")
-stats_for_nerds_html = slides_html.get_attribute("innerHTML")
+with open(args.html_file) as fp:
+    nb_html = BeautifulSoup(fp, features="lxml")
 
-with open("prepared_stats_for_nerds.slides.html", "w") as slides_file:
-    slides_file.write(stats_for_nerds_html)
+prepped_html = repr(nb_html.body)
 
-driver.close()
+with open(args.output_file, "w") as slides_file:
+    slides_file.write(prepped_html)
+

@@ -43,7 +43,7 @@ class SimilarityScorer:
         self.extractor = FeatureExtractor(num_workers=num_workers, gpu=gpu)
         self.similarity_viewer = SimilarityViewer(sample_percent=show)
         self.similarity_clustering = SimilarityClustering(
-            clustering_threshold=clustering_threshold
+            clustering_threshold=clustering_threshold, auto_select=auto_select
         )
 
         # baseline metrics

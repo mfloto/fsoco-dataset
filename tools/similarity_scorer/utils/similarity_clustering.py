@@ -22,6 +22,7 @@ class SimilarityClustering:
         self.filenames_in_folder = defaultdict(list)
         self.ids_in_folder = defaultdict(list)
 
+        self.graph = None
         self.clusters = []
 
     def active(self):
@@ -53,9 +54,11 @@ class SimilarityClustering:
 
     def _find_clusters(self):
         high_similarity = self.similarity_matrix > self.clustering_threshold
-        graph = nx.from_numpy_matrix(high_similarity, create_using=nx.Graph)
+        self.graph = nx.from_numpy_matrix(high_similarity, create_using=nx.Graph)
         self.clusters = [
-            cluster for cluster in nx.connected_components(graph) if len(cluster) > 1
+            cluster
+            for cluster in nx.connected_components(self.graph)
+            if len(cluster) > 1
         ]
         self.clusters.sort(key=len)
         self.clusters.reverse()
@@ -74,6 +77,43 @@ class SimilarityClustering:
     def _get_filenames_for_ids(self, ids):
         for i in ids:
             yield self.image_name_for_index[i]
+
+    def _get_auto_selection(self):
+        finished = False
+        num_removed_nodes = 0
+        iterations = 0
+
+        while not finished:
+            clusters = [
+                cluster
+                for cluster in nx.connected_components(self.graph)
+                if len(cluster) > 1
+            ]
+
+            if len(clusters) == 0:
+                finished = True
+                Logger.log_info(
+                    f"Needed {iterations} iterations to break up clusters. "
+                    f"Removed {num_removed_nodes} images in auto selection process!"
+                )
+                break
+            else:
+                iterations += 1
+
+            for cluster in clusters:
+                max_edges = 0
+                node_with_max_edges = -1
+
+                for node in cluster:
+                    edges = self.graph.edges(node)
+                    if len(edges) > max_edges:
+                        node_with_max_edges = node
+                        max_edges = len(edges)
+
+                self.graph.remove_node(node_with_max_edges)
+                num_removed_nodes += 1
+
+        return list(self.graph.nodes)
 
     def run(self):
         self._find_clusters()
@@ -106,4 +146,15 @@ class SimilarityClustering:
             for file in self._get_filenames_for_ids(in_no_cluster):
                 src = Path(file)
                 dst = no_cluster_folder / src.name
+                shutil.copy2(src, dst)
+
+        if self.auto_select:
+            selection_folder = Path(review_folder / "_auto_selection_")
+            Path.mkdir(selection_folder)
+
+            selection_ids = self._get_auto_selection()
+
+            for file in self._get_filenames_for_ids(selection_ids):
+                src = Path(file)
+                dst = selection_folder / src.name
                 shutil.copy2(src, dst)

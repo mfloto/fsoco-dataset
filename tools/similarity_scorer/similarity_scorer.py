@@ -24,6 +24,7 @@ class SimilarityScorer:
         self,
         image_glob: str,
         clustering_threshold: float = 0.0,
+        auto_select: bool = False,
         num_workers: int = 2,
         gpu: bool = True,
         report_csv: str = None,

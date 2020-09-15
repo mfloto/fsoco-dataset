@@ -12,8 +12,9 @@ CLUSTER_FOLDER_NAME = "clusters"
 
 
 class SimilarityClustering:
-    def __init__(self, clustering_threshold: float):
+    def __init__(self, clustering_threshold: float, auto_select: bool = False):
         self.clustering_threshold = clustering_threshold
+        self.auto_select = auto_select
 
         self.similarity_matrix = None
         self.image_name_for_index = None

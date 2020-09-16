@@ -4,11 +4,15 @@ import networkx as nx
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from collections import defaultdict
+import time
 
 from .logger import Logger
 
 # Clusters
-CLUSTER_FOLDER_NAME = "clusters"
+CLUSTERS_FOLDER_NAME = "clusters"
+CLUSTER_FOLDER_PREFIX = "cluster_"
+NO_CLUSTER_FOLDER_NAME = "_no_cluster_"
+AUTO_SELECTION_FOLDER = "_auto_selection_"
 
 
 class SimilarityClustering:
@@ -31,7 +35,7 @@ class SimilarityClustering:
     @staticmethod
     def _create_output_folders(folder: str):
         src_folder = Path(folder)
-        review_folder = Path(f"{folder}/{CLUSTER_FOLDER_NAME}")
+        review_folder = Path(f"{folder}/{CLUSTERS_FOLDER_NAME}")
 
         shutil.rmtree(review_folder, ignore_errors=True)
         Path.mkdir(review_folder)
@@ -79,11 +83,16 @@ class SimilarityClustering:
             yield self.image_name_for_index[i]
 
     def _get_auto_selection(self):
+        Logger.log_info("Start auto selection process.")
+
         finished = False
         num_removed_nodes = 0
         iterations = 0
 
         while not finished:
+            start_time = time.time()
+            num_nodes_in_clusters = 0
+
             clusters = [
                 cluster
                 for cluster in nx.connected_components(self.graph)
@@ -92,10 +101,14 @@ class SimilarityClustering:
 
             if len(clusters) == 0:
                 finished = True
+                Logger.log_info(f"Needed {iterations} iterations to break up clusters.")
                 Logger.log_info(
-                    f"Needed {iterations} iterations to break up clusters. "
                     f"Removed {num_removed_nodes} images in auto selection process!"
                 )
+                Logger.log_info(
+                    f"Final selection has a total of {len(self.graph.nodes)} images."
+                )
+
                 break
             else:
                 iterations += 1
@@ -103,8 +116,12 @@ class SimilarityClustering:
             for cluster in clusters:
                 max_edges = 0
                 node_with_max_edges = -1
+                cluster_size = len(cluster)
 
                 for node in cluster:
+                    # only count nodes that are still in a cluster after this iteration
+                    num_nodes_in_clusters += 1 if cluster_size > 2 else 0
+
                     edges = self.graph.edges(node)
                     if len(edges) > max_edges:
                         node_with_max_edges = node
@@ -112,6 +129,13 @@ class SimilarityClustering:
 
                 self.graph.remove_node(node_with_max_edges)
                 num_removed_nodes += 1
+
+            round_duration = time.time() - start_time
+            nodes_still_in_cluster = num_nodes_in_clusters - len(clusters)
+            print(
+                f"> Removal round {iterations}: time needed {round_duration:4.2f}s; {nodes_still_in_cluster} images still in a cluster ...",
+                end="\r",
+            )
 
         return list(self.graph.nodes)
 
@@ -134,7 +158,7 @@ class SimilarityClustering:
             )
 
             for i, cluster in enumerate(clusters_in_folder):
-                cluster_folder = Path(review_folder / f"cluster_{i:04d}")
+                cluster_folder = Path(review_folder / f"{CLUSTER_FOLDER_PREFIX}{i:04d}")
                 Path.mkdir(cluster_folder)
 
                 for file in self._get_filenames_for_ids(cluster):
@@ -142,7 +166,7 @@ class SimilarityClustering:
                     dst = cluster_folder / src.name
                     shutil.copy2(src, dst)
 
-            no_cluster_folder = Path(review_folder / "_no_cluster_")
+            no_cluster_folder = Path(review_folder / NO_CLUSTER_FOLDER_NAME)
             Path.mkdir(no_cluster_folder)
 
             for file in self._get_filenames_for_ids(in_no_cluster):

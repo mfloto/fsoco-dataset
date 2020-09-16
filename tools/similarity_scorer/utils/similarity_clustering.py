@@ -117,6 +117,8 @@ class SimilarityClustering:
 
     def run(self):
         self._find_clusters()
+        selection_ids = self._get_auto_selection() if self.auto_select else []
+
         for folder, ids_in_folder in self.ids_in_folder.items():
             ids_in_folder = set(ids_in_folder)
             _, review_folder = self._create_output_folders(folder)
@@ -148,13 +150,13 @@ class SimilarityClustering:
                 dst = no_cluster_folder / src.name
                 shutil.copy2(src, dst)
 
-        if self.auto_select:
-            selection_folder = Path(review_folder / "_auto_selection_")
-            Path.mkdir(selection_folder)
+            if self.auto_select:
+                selection_folder = Path(review_folder / "_auto_selection_")
+                Path.mkdir(selection_folder)
 
-            selection_ids = self._get_auto_selection()
+                selected_ids_in_folder = set(ids_in_folder) & set(selection_ids)
 
-            for file in self._get_filenames_for_ids(selection_ids):
-                src = Path(file)
-                dst = selection_folder / src.name
-                shutil.copy2(src, dst)
+                for file in self._get_filenames_for_ids(selected_ids_in_folder):
+                    src = Path(file)
+                    dst = selection_folder / src.name
+                    shutil.copy2(src, dst)

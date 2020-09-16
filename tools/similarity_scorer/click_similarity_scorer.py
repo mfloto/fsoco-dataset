@@ -113,6 +113,11 @@ def similarity_scorer(
         Logger.log_error("fsoco similarity-scorer '*/*.jpeg'")
         return False
 
+    if auto and clustering_threshold == 0.0:
+        Logger.log_error("Auto selection called without threshold!")
+        Logger.log_error("Please specify like '--clustering_threshold 0.985'")
+        return False
+
     Logger.log_info("Running image similarity scorer")
 
     checker = SimilarityScorer(

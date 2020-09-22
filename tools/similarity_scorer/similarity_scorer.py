@@ -192,6 +192,7 @@ class SimilarityScorer:
             self.similarity_clustering.load_images(feature_vectors)
             self.similarity_clustering.run()
 
+        if self.similarity_clustering.auto_select:
             Logger.log_info("Recalculate metrics for selection.", bold=True)
             self._calc_auto_selection_metrics()
 

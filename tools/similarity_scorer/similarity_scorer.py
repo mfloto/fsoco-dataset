@@ -7,7 +7,11 @@ from .metrics.metric import Metric
 from .utils.feature_extractor import FeatureExtractor
 from .utils.logger import Logger
 from .utils.similarity_viewer import SimilarityViewer
-from .utils.similarity_clustering import SimilarityClustering
+from .utils.similarity_clustering import (
+    SimilarityClustering,
+    CLUSTERS_FOLDER_NAME,
+    AUTO_SELECTION_FOLDER,
+)
 
 # pandas
 pd.set_option("display.max_rows", 500)
@@ -87,10 +91,16 @@ class SimilarityScorer:
         self.df = df
         self.single_folder = self.df["folder"].value_counts().size == 1
 
-    def _print_results(self):
+    def _print_results(self, auto_selection_run: bool = False):
         pd.set_option("display.width", 100)
         pd.set_option("display.max_colwidth", 20)
         pd.set_option("float_format", "{:04.2f}".format)
+
+        if auto_selection_run:
+            self.df["folder"] = self.df["folder"].str.replace(
+                f"/{CLUSTERS_FOLDER_NAME}/{AUTO_SELECTION_FOLDER}", "/.."
+            )
+
         self.df["folder"] = self.df["folder"].str.slice(
             start=-20
         )  # workaround for displaying
@@ -143,6 +153,28 @@ class SimilarityScorer:
             Logger.log_info(f"Saving results to {self.report_csv}")
             self.df.to_csv(self.report_csv)
 
+    def _calc_auto_selection_metrics(self):
+        # construct glob for _auto_selection_ folder
+        glob_parts = self.image_glob.rsplit("/", 1)
+        if len(glob_parts) == 2:
+            new_glob = f"{glob_parts[0]}/{CLUSTERS_FOLDER_NAME}/{AUTO_SELECTION_FOLDER}/{glob_parts[1]}"
+        elif len(glob_parts) == 1:
+            new_glob = (
+                f"./{CLUSTERS_FOLDER_NAME}/{AUTO_SELECTION_FOLDER}/{glob_parts[0]}"
+            )
+        else:
+            Logger.log_error("Could not generate GLOB for auto selection folder!")
+            return
+
+        feature_vectors = self.extractor.extract_feature_vectors_for_files(new_glob)
+        self._calculate_metrics(feature_vectors)
+        self._prepare_results()
+
+        Logger.log_info("Score after auto selection:", bold=True)
+        self._print_results(auto_selection_run=True)
+
+        print()
+
     def run(self):
         # extract features
         feature_vectors = self.extractor.extract_feature_vectors_for_files(
@@ -159,6 +191,9 @@ class SimilarityScorer:
             Logger.log_info("Start similarity clustering.")
             self.similarity_clustering.load_images(feature_vectors)
             self.similarity_clustering.run()
+
+            Logger.log_info("Recalculate metrics for selection.")
+            self._calc_auto_selection_metrics()
 
         if self.similarity_viewer.active():
             self.similarity_viewer.load_images(feature_vectors)

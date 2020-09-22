@@ -113,6 +113,8 @@ class SimilarityClustering:
             else:
                 iterations += 1
 
+            # TODO performance bottleneck, find parallel solution
+
             for cluster in clusters:
                 max_edges = 0
                 node_with_max_edges = -1

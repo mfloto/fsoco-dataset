@@ -101,12 +101,14 @@ class SimilarityClustering:
 
             if len(clusters) == 0:
                 finished = True
+
+                num_nodes_final = len(self.graph.nodes)
+                num_nodes_total = num_nodes_final + num_removed_nodes
+
                 Logger.log_info(f"Needed {iterations} iterations to break up clusters.")
                 Logger.log_info(
-                    f"Removed {num_removed_nodes} images in auto selection process!"
-                )
-                Logger.log_info(
-                    f"Final selection has a total of {len(self.graph.nodes)} images."
+                    f"Picked {num_nodes_final} out of {num_nodes_total} images.",
+                    bold=True,
                 )
 
                 break

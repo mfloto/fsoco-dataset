@@ -134,11 +134,11 @@ Then copy over all the images from the **\_no_cluster\_** folder and select the 
 After you finished the manual selection, rerun the scorer on the new top-level folder and check your score. 
 You may also want to copy the cache file to save recomputing the feature vectors. 
 
-There is also a automatic workflow using `--auto` in combination with `--clustering_threshold [0.0-1.0]`.
+There is also an automatic workflow using `--auto` in combination with `--clustering_threshold [0.0-1.0]`.
 For example if you use `--auto --clustering_threshold 0.98` the tool will start removing images from the dataset 
-until there are no similarities greater or equal *0.98* left. The final selection is placed under `[input_foler]\clusters\_auto_selection_`.
+until there are no similarities greater than or equal to *0.98* left. The final selection is placed under `[input_folder]\clusters\_auto_selection_`.
 But please double check the data, as the tool has only limited understanding of the real world. 
-The selection process can take up to some minutes, depending on the number of images.
+The selection process can take some time, depending on the number of images.
 
 Frames extracted from the same video typically end up in one cluster.  
 If the video frames meet the requirements stated above (official setup, blue/yellow boundaries, sampled at 0.5m distance traveled, max one lap)

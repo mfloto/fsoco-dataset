@@ -110,7 +110,7 @@ class FeatureExtractor:
             retires = 0
             while (
                 not FeatureExtractor._pretrained_model_is_downloaded()
-                and retires < 10000
+                and retires < 1200
             ):
                 time.sleep(0.5)
                 retires += 1

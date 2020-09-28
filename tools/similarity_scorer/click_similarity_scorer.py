@@ -120,6 +120,9 @@ def similarity_scorer(
 
     Logger.log_info("Running image similarity scorer")
 
+    # allows the glob to work when passed in double quotes
+    image_glob = image_glob.replace('"', "")
+
     checker = SimilarityScorer(
         image_glob=image_glob,
         clustering_threshold=clustering_threshold,

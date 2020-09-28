@@ -21,7 +21,10 @@ IMG2VEV_MODEL = "alexnet"
 IMG2VEV_OUTPUT_LAYER = 3
 IMG2VEV_OUTPUT_SIZE = 4096
 
-TORCH_CACHE = Path.home() / ".cache/torch/checkpoints"
+TORCH_CACHE_LOCATIONS = [
+    Path.home() / ".cache/torch/checkpoints",
+    Path.home() / ".cache/torch/hub/checkpoints",
+]
 PRETRAINED_MODEL_GLOB = "alexnet-owt-*"
 
 # will be initialized in every pool process!
@@ -70,7 +73,12 @@ class FeatureExtractor:
 
     @staticmethod
     def _pretrained_model_is_downloaded():
-        return len(list(TORCH_CACHE.glob(PRETRAINED_MODEL_GLOB))) > 0
+        model_found = False
+        for cache_location in TORCH_CACHE_LOCATIONS:
+            if len(list(cache_location.glob(PRETRAINED_MODEL_GLOB))) > 0:
+                model_found = True
+
+        return model_found
 
     @staticmethod
     def _pool_process_init():

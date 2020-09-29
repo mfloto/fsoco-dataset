@@ -115,12 +115,27 @@ class FeatureExtractor:
                 time.sleep(0.5)
                 retires += 1
 
-        img2vec = Img2Vec(
-            cuda=use_gpu,
-            model=IMG2VEV_MODEL,
-            layer_output_size=IMG2VEV_OUTPUT_SIZE,
-            layer=IMG2VEV_OUTPUT_LAYER,
-        )
+        try:
+            img2vec = Img2Vec(
+                cuda=use_gpu,
+                model=IMG2VEV_MODEL,
+                layer_output_size=IMG2VEV_OUTPUT_SIZE,
+                layer=IMG2VEV_OUTPUT_LAYER,
+            )
+        except RuntimeError as e:
+            if e.args[0] == "CUDA error: out of memory":
+                Logger.log_warn(
+                    f"Worker-{process_id} using CPU as fallback due to insufficient GPU memory"
+                )
+
+                img2vec = Img2Vec(
+                    cuda=False,
+                    model=IMG2VEV_MODEL,
+                    layer_output_size=IMG2VEV_OUTPUT_SIZE,
+                    layer=IMG2VEV_OUTPUT_LAYER,
+                )
+            else:
+                raise e
 
     def extract_feature_vectors_for_files(self, image_glob: str):
         Logger.log_info("Start extracting feature vectors ...")
@@ -213,7 +228,7 @@ class FeatureExtractor:
                     if image.mode != "RGB":
                         image = image.convert("RGB")
 
-                    # stupid workaround to keep Img2Vec from printing the shape of the result tensor
+                    # workaround to keep Img2Vec from printing the shape of the result tensor
                     sys.stdout = open(os.devnull, "w")
                     feature_vector = img2vec.get_vec(image)
                     sys.stdout = sys.__stdout__

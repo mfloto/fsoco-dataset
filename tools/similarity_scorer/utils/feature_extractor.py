@@ -105,6 +105,10 @@ class FeatureExtractor:
             Logger.log_info(
                 f"Will use {'GPU' if use_gpu else 'CPU'} for feature extracting."
             )
+
+            if not FeatureExtractor._pretrained_model_is_downloaded():
+                Logger.log_info("Downloading feature extractor model ...")
+
         else:  # This code will be executed by all other workers
             # This code keeps the other processes from downloading the pretrained model if it is not already downloaded
             retires = 0
@@ -116,12 +120,20 @@ class FeatureExtractor:
                 retires += 1
 
         try:
+            # hide pytorch download bar
+            sys.stdout = open(os.devnull, "w")
+            sys.stderr = open(os.devnull, "w")
+
             img2vec = Img2Vec(
                 cuda=use_gpu,
                 model=IMG2VEV_MODEL,
                 layer_output_size=IMG2VEV_OUTPUT_SIZE,
                 layer=IMG2VEV_OUTPUT_LAYER,
             )
+
+            sys.stdout = sys.__stdout__
+            sys.stderr = sys.__stderr__
+
         except RuntimeError as e:
             if e.args[0] == "CUDA error: out of memory":
                 Logger.log_warn(

@@ -1,12 +1,13 @@
-<!-- HTML used for easier automatic updates via scripts -->
-<html><body><p></p><p><a href="../LICENSE" target="_blank"><img alt="License GPL-3.0" src="https://img.shields.io/github/license/fsoco/fsoco-dataset?style=flat"/></a>
+<!-- HTML used for easier automatic updates via scripts --><html><body>
+<p></p>
+<p><a href="../LICENSE" target="_blank"><img alt="License GPL-3.0" src="https://img.shields.io/github/license/fsoco/fsoco-dataset?style=flat"/></a>
 <a href="https://www.codacy.com/manual/fsoco/fsoco-dataset?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=fsoco/fsoco-dataset&amp;utm_campaign=Badge_Grade"><img src="https://app.codacy.com/project/badge/Grade/16570c4c4b43418aa862bff60f6a61d4"/></a>
 <a href="https://www.fsoco-dataset.com/how_to_contribute/" target="_blank"><img alt="contributions welcome" src="https://img.shields.io/badge/contributions-welcome-brightgreen?style=flat"/></a>
 <a href="https://www.fsoco-dataset.com/contact_us/" target="_blank"><img alt="donations needed" src="https://img.shields.io/badge/data_donations-needed-red?style=flat"/></a> <br/></p>
 <h1>The FSOCO Dataset</h1>
-<p><a href="https://www.fsoco-dataset.com/contributors/" target="_blank"><img alt="Teams: 4" id="num_teams" src="https://img.shields.io/badge/Teams-4-green.svg"/></a>
-<a href="https://www.fsoco-dataset.com/overview/" target="_blank"><img alt="Amount of labeled images: 2053" id="num_bbox_images" src="https://img.shields.io/badge/Images-2,053-blue.svg"/></a>
-<a href="https://www.fsoco-dataset.com/overview/" target="_blank"><img alt="Amount of labeled cones: 33078" id="num_bbox_cones" src="https://img.shields.io/badge/Cones-33,078-blue.svg"/></a></p>
+<p><a href="https://www.fsoco-dataset.com/contributors/" target="_blank"><img alt="Teams: 5" id="num_teams" src="https://img.shields.io/badge/Teams-5-green.svg"/></a>
+<a href="https://www.fsoco-dataset.com/overview/" target="_blank"><img alt="Number of labeled images: 2247" id="num_bbox_images" src="https://img.shields.io/badge/Images-2,247-blue.svg"/></a>
+<a href="https://www.fsoco-dataset.com/overview/" target="_blank"><img alt="Number of labeled cones: 37907" id="num_bbox_cones" src="https://img.shields.io/badge/Cones-37,907-blue.svg"/></a></p>
 <p><img align="right" src="assets/img/examples/index.png" width="400"/></p>
 <p>The FSOCO dataset helps Formula Student / FSAE teams to get started with their visual perception system for driverless disciplines.
 State-of-the-art object detection systems require a substantial amount of data, which can be a challenge for new teams.
@@ -22,13 +23,15 @@ Henceforth, other events have adapted the driverless class and the self-driving 
 <h2>Contributing</h2>
 <p>Some of the ways to contribute are:</p>
 <p><a href="https://www.fsoco-dataset.com/how_to_contribute/">Dataset contributions</a>:
-</p><ul>
+</p>
+<ul>
 <li> Donate raw data for other teams to label that don't have cones or sensors</li>
 <li> Label donated images as your contribution to the dataset</li>
 <li> Contribute your team's private dataset</li>
 </ul>
 <p><a href="../CONTRIBUTING.md#contribute">Tools contributions</a>:
-</p><ul>
+</p>
+<ul>
 <li>Report bugs</li>
 <li>Correct or add documentation</li>
 <li>Add a new tool</li>
@@ -55,7 +58,7 @@ We would like to thank all <a href="https://www.fsoco-dataset.com/contributors/"
 <p>This project follows the <a href="https://github.com/all-contributors/all-contributors">all-contributors</a> specification.
 For details on what the emoji mean, please see the <a href="../CONTRIBUTING.md#all_contributors">contribution documentation</a>.</p>
 <h2>Contact</h2>
-Please feel free to contact us with any questions, suggestions, or comments:
+<p>Please feel free to contact us with any questions, suggestions, or comments:</p>
 <ul>
 <li>
 <p>Contact form: <a href="https://www.fsoco-dataset.com/contact_us/">www.fsoco-dataset.com/contact_us</a></p>
@@ -63,4 +66,6 @@ Please feel free to contact us with any questions, suggestions, or comments:
 <li>
 <p>Email: <a href="mailto:fsoco.dataset@gmail.com">fsoco.dataset@gmail.com</a></p>
 </li>
-</ul></body></html>
+</ul>
+<p></p>
+</body></html>

@@ -8,9 +8,9 @@ from watermark.watermark import main
 @click.argument("logo_file", required=True)
 def watermark(input_directory, image_format, logo_file):
     """
-        Small script for dry-running watermarking.
+    Small script for dry-running watermarking.
 
-        Based on the FSOCO Image Import plugin for supervisely.
+    Based on the FSOCO Image Import plugin for supervisely.
     """
     click.echo("[LOG] Running Watermark script")
     main(input_directory, image_format=image_format, logo_file_name=logo_file)

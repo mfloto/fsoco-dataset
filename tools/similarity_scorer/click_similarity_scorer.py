@@ -18,6 +18,13 @@ from .utils.logger import Logger
     default=0.0,
 )
 @click.option(
+    "--auto",
+    "--auto_select",
+    help="Automatically selects the best images based on the clustering threshold.",
+    is_flag=True,
+    default=False,
+)
+@click.option(
     "--num_workers",
     default=4,
     help="Number of workers for extraction process, max number depends on GPU memory!",
@@ -36,6 +43,7 @@ def similarity_scorer(
     image_glob,
     catch_wildcard_expansion,
     clustering_threshold,
+    auto,
     num_workers,
     gpu,
     report_csv,
@@ -105,11 +113,20 @@ def similarity_scorer(
         Logger.log_error("fsoco similarity-scorer '*/*.jpeg'")
         return False
 
+    if auto and clustering_threshold == 0.0:
+        Logger.log_error("Auto selection called without threshold!")
+        Logger.log_error("Please specify like '--clustering_threshold 0.985'")
+        return False
+
     Logger.log_info("Running image similarity scorer")
+
+    # allows the glob to work when passed in double quotes
+    image_glob = image_glob.replace('"', "")
 
     checker = SimilarityScorer(
         image_glob=image_glob,
         clustering_threshold=clustering_threshold,
+        auto_select=auto,
         num_workers=num_workers,
         gpu=gpu,
         report_csv=report_csv,

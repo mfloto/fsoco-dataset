@@ -22,19 +22,19 @@ class Logger:
         return prefix
 
     @staticmethod
-    def log_info(string: str, ctx: str = None):
+    def log_info(string: str, ctx: str = None, bold: bool = False):
         print(
-            f"{Logger.Colors.OKGREEN}{Logger._get_log_prefix(ctx)}{string}{Logger.Colors.ENDC}"
+            f"{Logger.Colors.BOLD if bold else ''}{Logger.Colors.OKGREEN}{Logger._get_log_prefix(ctx)}{string}{Logger.Colors.ENDC}"
         )
 
     @staticmethod
-    def log_warn(string: str, ctx: str = None):
+    def log_warn(string: str, ctx: str = None, bold: bool = False):
         print(
-            f"{Logger.Colors.WARNING}{Logger._get_log_prefix(ctx)}{string}{Logger.Colors.ENDC}"
+            f"{Logger.Colors.BOLD if bold else ''}{Logger.Colors.WARNING}{Logger._get_log_prefix(ctx)}{string}{Logger.Colors.ENDC}"
         )
 
     @staticmethod
-    def log_error(string: str, ctx: str = None):
+    def log_error(string: str, ctx: str = None, bold: bool = False):
         print(
-            f"{Logger.Colors.FAIL}{Logger._get_log_prefix(ctx)}{string}{Logger.Colors.ENDC}"
+            f"{Logger.Colors.BOLD if bold else ''}{Logger.Colors.FAIL}{Logger._get_log_prefix(ctx)}{string}{Logger.Colors.ENDC}"
         )

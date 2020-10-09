@@ -22,13 +22,15 @@ Henceforth, other events have adapted the driverless class and the self-driving 
 <h2>Contributing</h2>
 <p>Some of the ways to contribute are:</p>
 <p><a href="https://www.fsoco-dataset.com/how_to_contribute/">Dataset contributions</a>:
-</p><ul>
+</p>
+<ul>
 <li> Donate raw data for other teams to label that don't have cones or sensors</li>
 <li> Label donated images as your contribution to the dataset</li>
 <li> Contribute your team's private dataset</li>
 </ul>
 <p><a href="../CONTRIBUTING.md#contribute">Tools contributions</a>:
-</p><ul>
+</p>
+<ul>
 <li>Report bugs</li>
 <li>Correct or add documentation</li>
 <li>Add a new tool</li>
@@ -55,7 +57,7 @@ We would like to thank all <a href="https://www.fsoco-dataset.com/contributors/"
 <p>This project follows the <a href="https://github.com/all-contributors/all-contributors">all-contributors</a> specification.
 For details on what the emoji mean, please see the <a href="../CONTRIBUTING.md#all_contributors">contribution documentation</a>.</p>
 <h2>Contact</h2>
-Please feel free to contact us with any questions, suggestions, or comments:
+<p>Please feel free to contact us with any questions, suggestions, or comments:</p>
 <ul>
 <li>
 <p>Contact form: <a href="https://www.fsoco-dataset.com/contact_us/">www.fsoco-dataset.com/contact_us</a></p>

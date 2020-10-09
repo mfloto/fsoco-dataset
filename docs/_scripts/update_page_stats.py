@@ -52,6 +52,11 @@ def update_stats_badges(md_paths: [str], stats: dict):
             f"Overwriting with current stats the following markdown file: {md_path}"
         )
         with open(md_path, "w") as stats_md:
+            # Gets the first p tag
+            top_empty_paragraph = stats_soup.p
+            top_empty_paragraph.decompose()
+            stats_soup.find_all("p")[-1].decompose()
+
             stats_md.write(repr(stats_soup))
 
 

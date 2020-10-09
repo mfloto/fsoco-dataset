@@ -147,8 +147,6 @@ class SimilarityClustering:
         self._find_clusters()
         selection_ids = self._get_auto_selection() if self.auto_select else []
 
-        Logger.log_info("Start copying images into cluster folder ...")
-
         for folder, ids_in_folder in self.ids_in_folder.items():
             ids_in_folder = set(ids_in_folder)
             _, review_folder = self._create_output_folders(folder)
@@ -162,6 +160,8 @@ class SimilarityClustering:
             Logger.log_info(
                 f"{folder} -> {cluster_ratio * 100:.2f}% of the images are in dense clusters!"
             )
+
+            Logger.log_info(f"{folder} -> Start copying images into cluster folder ...")
 
             for i, cluster in enumerate(clusters_in_folder):
                 cluster_folder = Path(review_folder / f"{CLUSTER_FOLDER_PREFIX}{i:04d}")

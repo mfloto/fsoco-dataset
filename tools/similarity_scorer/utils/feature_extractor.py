@@ -21,7 +21,10 @@ IMG2VEV_MODEL = "alexnet"
 IMG2VEV_OUTPUT_LAYER = 3
 IMG2VEV_OUTPUT_SIZE = 4096
 
-TORCH_CACHE = Path.home() / ".cache/torch/checkpoints"
+TORCH_CACHE_LOCATIONS = [
+    Path.home() / ".cache/torch/checkpoints",
+    Path.home() / ".cache/torch/hub/checkpoints",
+]
 PRETRAINED_MODEL_GLOB = "alexnet-owt-*"
 
 # will be initialized in every pool process!
@@ -70,7 +73,12 @@ class FeatureExtractor:
 
     @staticmethod
     def _pretrained_model_is_downloaded():
-        return len(list(TORCH_CACHE.glob(PRETRAINED_MODEL_GLOB))) > 0
+        model_found = False
+        for cache_location in TORCH_CACHE_LOCATIONS:
+            if len(list(cache_location.glob(PRETRAINED_MODEL_GLOB))) > 0:
+                model_found = True
+
+        return model_found
 
     @staticmethod
     def _pool_process_init():
@@ -97,22 +105,49 @@ class FeatureExtractor:
             Logger.log_info(
                 f"Will use {'GPU' if use_gpu else 'CPU'} for feature extracting."
             )
+
+            if not FeatureExtractor._pretrained_model_is_downloaded():
+                Logger.log_info("Downloading feature extractor model ...")
+
         else:  # This code will be executed by all other workers
             # This code keeps the other processes from downloading the pretrained model if it is not already downloaded
             retires = 0
             while (
                 not FeatureExtractor._pretrained_model_is_downloaded()
-                and retires < 10000
+                and retires < 1200
             ):
                 time.sleep(0.5)
                 retires += 1
 
-        img2vec = Img2Vec(
-            cuda=use_gpu,
-            model=IMG2VEV_MODEL,
-            layer_output_size=IMG2VEV_OUTPUT_SIZE,
-            layer=IMG2VEV_OUTPUT_LAYER,
-        )
+        try:
+            # hide pytorch download bar
+            sys.stdout = open(os.devnull, "w")
+            sys.stderr = open(os.devnull, "w")
+
+            img2vec = Img2Vec(
+                cuda=use_gpu,
+                model=IMG2VEV_MODEL,
+                layer_output_size=IMG2VEV_OUTPUT_SIZE,
+                layer=IMG2VEV_OUTPUT_LAYER,
+            )
+
+            sys.stdout = sys.__stdout__
+            sys.stderr = sys.__stderr__
+
+        except RuntimeError as e:
+            if e.args[0] == "CUDA error: out of memory":
+                Logger.log_warn(
+                    f"Worker-{process_id} using CPU as fallback due to insufficient GPU memory"
+                )
+
+                img2vec = Img2Vec(
+                    cuda=False,
+                    model=IMG2VEV_MODEL,
+                    layer_output_size=IMG2VEV_OUTPUT_SIZE,
+                    layer=IMG2VEV_OUTPUT_LAYER,
+                )
+            else:
+                raise e
 
     def extract_feature_vectors_for_files(self, image_glob: str):
         Logger.log_info("Start extracting feature vectors ...")
@@ -129,7 +164,9 @@ class FeatureExtractor:
 
         start_time = time.time()
 
-        with tqdm(total=len(files), desc="extracting feature vectors") as pbar:
+        with tqdm(
+            total=len(files), desc="extracting feature vectors", unit="images"
+        ) as pbar:
             if DEBUG_DISABLE_MULTIPROCESSING:
                 FeatureExtractor._pool_process_init()
                 results = []
@@ -205,7 +242,7 @@ class FeatureExtractor:
                     if image.mode != "RGB":
                         image = image.convert("RGB")
 
-                    # stupid workaround to keep Img2Vec from printing the shape of the result tensor
+                    # workaround to keep Img2Vec from printing the shape of the result tensor
                     sys.stdout = open(os.devnull, "w")
                     feature_vector = img2vec.get_vec(image)
                     sys.stdout = sys.__stdout__

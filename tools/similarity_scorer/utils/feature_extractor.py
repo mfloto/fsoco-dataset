@@ -82,8 +82,6 @@ class FeatureExtractor:
 
     @staticmethod
     def _pool_process_init():
-        start = time.time()
-
         global img2vec, use_gpu, process_local_cache
         # somewhat inefficient as the model gets loaded to GPU as many times as there are processes!
         # but so far good enough
@@ -150,8 +148,6 @@ class FeatureExtractor:
                 )
             else:
                 raise e
-
-        Logger.log_info(f"init -> {(time.time() - start):04.2f} s")
 
     def extract_feature_vectors_for_files(self, image_glob: str):
         Logger.log_info("Start extracting feature vectors ...")

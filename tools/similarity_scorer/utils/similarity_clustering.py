@@ -147,6 +147,8 @@ class SimilarityClustering:
         self._find_clusters()
         selection_ids = self._get_auto_selection() if self.auto_select else []
 
+        Logger.log_info("Start copying images into cluster folder ...")
+
         for folder, ids_in_folder in self.ids_in_folder.items():
             ids_in_folder = set(ids_in_folder)
             _, review_folder = self._create_output_folders(folder)

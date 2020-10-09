@@ -5,6 +5,7 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from collections import defaultdict
 import time
+from tqdm import tqdm
 
 from .logger import Logger
 
@@ -147,12 +148,10 @@ class SimilarityClustering:
         self._find_clusters()
         selection_ids = self._get_auto_selection() if self.auto_select else []
 
+        number_images_to_copy = 0
         for folder, ids_in_folder in self.ids_in_folder.items():
             ids_in_folder = set(ids_in_folder)
-            _, review_folder = self._create_output_folders(folder)
-            clusters_in_folder, in_no_cluster = self._get_clusters_for_ids(
-                ids_in_folder
-            )
+            _, in_no_cluster = self._get_clusters_for_ids(ids_in_folder)
 
             cluster_ratio = (len(ids_in_folder) - len(in_no_cluster)) / len(
                 ids_in_folder
@@ -161,32 +160,49 @@ class SimilarityClustering:
                 f"{folder} -> {cluster_ratio * 100:.2f}% of the images are in dense clusters!"
             )
 
-            Logger.log_info(f"{folder} -> Start copying images into cluster folder ...")
-
-            for i, cluster in enumerate(clusters_in_folder):
-                cluster_folder = Path(review_folder / f"{CLUSTER_FOLDER_PREFIX}{i:04d}")
-                Path.mkdir(cluster_folder)
-
-                for file in self._get_filenames_for_ids(cluster):
-                    src = Path(file)
-                    dst = cluster_folder / src.name
-                    shutil.copy2(src, dst)
-
-            no_cluster_folder = Path(review_folder / NO_CLUSTER_FOLDER_NAME)
-            Path.mkdir(no_cluster_folder)
-
-            for file in self._get_filenames_for_ids(in_no_cluster):
-                src = Path(file)
-                dst = no_cluster_folder / src.name
-                shutil.copy2(src, dst)
-
+            number_images_to_copy += len(ids_in_folder)
             if self.auto_select:
-                selection_folder = Path(review_folder / "_auto_selection_")
-                Path.mkdir(selection_folder)
-
                 selected_ids_in_folder = set(ids_in_folder) & set(selection_ids)
+                number_images_to_copy += len(selected_ids_in_folder)
 
-                for file in self._get_filenames_for_ids(selected_ids_in_folder):
+        Logger.log_info("Start copying images into cluster folders ...")
+
+        with tqdm(total=number_images_to_copy) as pbar:
+            for folder, ids_in_folder in self.ids_in_folder.items():
+                ids_in_folder = set(ids_in_folder)
+                _, review_folder = self._create_output_folders(folder)
+                clusters_in_folder, in_no_cluster = self._get_clusters_for_ids(
+                    ids_in_folder
+                )
+
+                for i, cluster in enumerate(clusters_in_folder):
+                    cluster_folder = Path(
+                        review_folder / f"{CLUSTER_FOLDER_PREFIX}{i:04d}"
+                    )
+                    Path.mkdir(cluster_folder)
+
+                    for file in self._get_filenames_for_ids(cluster):
+                        src = Path(file)
+                        dst = cluster_folder / src.name
+                        shutil.copy2(src, dst)
+
+                no_cluster_folder = Path(review_folder / NO_CLUSTER_FOLDER_NAME)
+                Path.mkdir(no_cluster_folder)
+
+                for file in self._get_filenames_for_ids(in_no_cluster):
                     src = Path(file)
-                    dst = selection_folder / src.name
+                    dst = no_cluster_folder / src.name
                     shutil.copy2(src, dst)
+                    pbar.update(1)
+
+                if self.auto_select:
+                    selection_folder = Path(review_folder / "_auto_selection_")
+                    Path.mkdir(selection_folder)
+
+                    selected_ids_in_folder = set(ids_in_folder) & set(selection_ids)
+
+                    for file in self._get_filenames_for_ids(selected_ids_in_folder):
+                        src = Path(file)
+                        dst = selection_folder / src.name
+                        shutil.copy2(src, dst)
+                        pbar.update(1)

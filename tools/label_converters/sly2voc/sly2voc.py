@@ -24,7 +24,7 @@ TXT_EXT = ".txt"
 
 def save_images_lists(path, tags_to_lists):
     for tag_name, samples_desc_list in tags_to_lists.items():
-        with open(os.path.join(path, tag_name + TXT_EXT), "w") as fout:
+        with open(os.path.join(path, tag_name + TXT_EXT), "a+") as fout:
             for record in samples_desc_list:
                 fout.write(
                     "{}  {}\n".format(record[0], record[1])
@@ -39,13 +39,19 @@ def get_total_num_images(project: Project):
     return total_num
 
 
-def iterate_project(save_path: Path, project: Project, remove_watermark: bool):
+def iterate_project(
+    save_path: Path, project: Project, remove_watermark: bool, merge: bool
+):
     # Create root pascal 'datasets' folders
     with tqdm(
         total=get_total_num_images(project), desc="convertig labels", unit="images"
     ) as pbar:
         for dataset in project.datasets:
-            pascal_dataset_path = save_path / f"{dataset.name}"
+
+            if merge:
+                pascal_dataset_path = save_path
+            else:
+                pascal_dataset_path = save_path / f"{dataset.name}"
 
             images_dir = pascal_dataset_path / "JPEGImages"
             anns_dir = pascal_dataset_path / "Annotations"
@@ -165,10 +171,10 @@ def handle_image(
     return ann.img_tags, no_ext_name, len(ann.labels)
 
 
-def main(sly_project_path: str, output_path: str, remove_watermark: bool):
+def main(sly_project_path: str, output_path: str, remove_watermark: bool, merge: bool):
     output_path = Path(output_path)
     if output_path.exists():
         shutil.rmtree(output_path)
 
     sly_project = Project(sly_project_path, OpenMode.READ)
-    iterate_project(output_path, sly_project, remove_watermark)
+    iterate_project(output_path, sly_project, remove_watermark, merge)

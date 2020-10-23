@@ -7,7 +7,8 @@ from .sly2voc import main
 @click.argument("sly_project_folder", type=str)
 @click.argument("output_folder", type=str)
 @click.option("--remove_watermark", is_flag=True, default=False)
-def sly2voc(sly_project_folder, output_folder, remove_watermark):
+@click.option("--merge", is_flag=True, default=False)
+def sly2voc(sly_project_folder, output_folder, remove_watermark, merge):
     """
      Supervisely  => Darknet YOLO format
 
@@ -47,7 +48,7 @@ def sly2voc(sly_project_folder, output_folder, remove_watermark):
 
     """
     click.echo("[LOG] Running Supervisely to Pascal VOC label converter")
-    main(sly_project_folder, output_folder, remove_watermark)
+    main(sly_project_folder, output_folder, remove_watermark, merge)
 
 
 if __name__ == "__main__":

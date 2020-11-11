@@ -164,7 +164,7 @@ def handle_image(
             ymax -= FSOCO_IMPORT_BORDER_THICKNESS
 
         writer.addObject(
-            name=obj_class.name, xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymin,
+            name=obj_class.name, xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymax,
         )
 
     writer.save(pascal_ann_path)

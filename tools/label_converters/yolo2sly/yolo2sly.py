@@ -168,7 +168,7 @@ def main(
     else:
         with tqdm(total=len(image_files)) as pbar:
             with mp.Pool() as pool:
-                for res in pool.imap(convert_label, image_files):
+                for _ in pool.imap(convert_label, image_files):
                     pbar.update(1)
 
     # Use FSOCO project meta file

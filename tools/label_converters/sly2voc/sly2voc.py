@@ -11,9 +11,10 @@ from functools import partial
 import pascal_voc_writer
 
 from supervisely_lib.io import fs as fs_utils
-from supervisely_lib.project.project import Project, OpenMode
+from supervisely_lib.project.project import Project, OpenMode, Dataset
 from supervisely_lib.annotation.annotation import Annotation
 from supervisely_lib.geometry.rectangle import Rectangle
+from typing import Dict
 
 from watermark.watermark import FSOCO_IMPORT_BORDER_THICKNESS
 
@@ -22,13 +23,12 @@ XML_EXT = ".xml"
 TXT_EXT = ".txt"
 
 
-def save_images_lists(path, tags_to_lists):
+def save_images_lists(path: Path, tags_to_lists: Dict[str, list]):
     for tag_name, samples_desc_list in tags_to_lists.items():
-        with open(os.path.join(path, tag_name + TXT_EXT), "a+") as fout:
+        with open(str(path / f"{tag_name}{TXT_EXT}"), "a+") as fout:
             for record in samples_desc_list:
-                fout.write(
-                    "{}  {}\n".format(record[0], record[1])
-                )  # 0 - sample name, 1 - objects count
+                fout.write(f"{record[0]}  {record[1]}\n")
+                # 0 - sample name, 1 - objects count
 
 
 def get_total_num_images(project: Project):
@@ -69,7 +69,7 @@ def iterate_project(
 
 
 def iterate_dataset(
-    dataset,
+    dataset: Dataset,
     images_dir: Path,
     anns_dir: Path,
     project: Project,
@@ -128,12 +128,12 @@ def rescale_copy_image(voc_export_images_dir: Path, src_file: Path, new_file_nam
 
 
 def handle_image(
-    dataset,
+    dataset: Dataset,
     images_dir: Path,
     anns_dir: Path,
     project: Project,
     remove_watermark: bool,
-    item_name,
+    item_name: str,
 ):
     img_path, ann_path = dataset.get_item_paths(item_name)
     no_ext_name = fs_utils.get_file_name(item_name)

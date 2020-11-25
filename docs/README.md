@@ -4,9 +4,9 @@
 <a href="https://www.fsoco-dataset.com/how_to_contribute/" target="_blank"><img alt="contributions welcome" src="https://img.shields.io/badge/contributions-welcome-brightgreen?style=flat"/></a>
 <a href="https://www.fsoco-dataset.com/contact_us/" target="_blank"><img alt="donations needed" src="https://img.shields.io/badge/data_donations-needed-red?style=flat"/></a> <br/>
 <h1>The FSOCO Dataset</h1>
-<p><a href="https://www.fsoco-dataset.com/contributors/" target="_blank"><img alt="Teams: 6" id="num_teams" src="https://img.shields.io/badge/Teams-6-green.svg"/></a>
-<a href="https://www.fsoco-dataset.com/overview/" target="_blank"><img alt="Number of labeled images: 2491" id="num_bbox_images" src="https://img.shields.io/badge/Images-2,491-blue.svg"/></a>
-<a href="https://www.fsoco-dataset.com/overview/" target="_blank"><img alt="Number of labeled cones: 42918" id="num_bbox_cones" src="https://img.shields.io/badge/Cones-42,918-blue.svg"/></a></p>
+<p><a href="https://www.fsoco-dataset.com/contributors/" target="_blank"><img alt="Teams: 11" id="num_teams" src="https://img.shields.io/badge/Teams-11-green.svg"/></a>
+<a href="https://www.fsoco-dataset.com/overview/" target="_blank"><img alt="Number of labeled images: 3821" id="num_bbox_images" src="https://img.shields.io/badge/Images-3,821-blue.svg"/></a>
+<a href="https://www.fsoco-dataset.com/overview/" target="_blank"><img alt="Number of labeled cones: 67905" id="num_bbox_cones" src="https://img.shields.io/badge/Cones-67,905-blue.svg"/></a></p>
 <p><img align="right" src="assets/img/examples/index.png" width="400"/></p>
 <p>The FSOCO dataset helps Formula Student / FSAE teams to get started with their visual perception system for driverless disciplines.
 State-of-the-art object detection systems require a substantial amount of data, which can be a challenge for new teams.
@@ -22,13 +22,15 @@ Henceforth, other events have adapted the driverless class and the self-driving 
 <h2>Contributing</h2>
 <p>Some of the ways to contribute are:</p>
 <p><a href="https://www.fsoco-dataset.com/how_to_contribute/">Dataset contributions</a>:
-</p><ul>
+</p>
+<ul>
 <li> Donate raw data for other teams to label that don't have cones or sensors</li>
 <li> Label donated images as your contribution to the dataset</li>
 <li> Contribute your team's private dataset</li>
 </ul>
 <p><a href="../CONTRIBUTING.md#contribute">Tools contributions</a>:
-</p><ul>
+</p>
+<ul>
 <li>Report bugs</li>
 <li>Correct or add documentation</li>
 <li>Add a new tool</li>
@@ -55,7 +57,7 @@ We would like to thank all <a href="https://www.fsoco-dataset.com/contributors/"
 <p>This project follows the <a href="https://github.com/all-contributors/all-contributors">all-contributors</a> specification.
 For details on what the emoji mean, please see the <a href="../CONTRIBUTING.md#all_contributors">contribution documentation</a>.</p>
 <h2>Contact</h2>
-Please feel free to contact us with any questions, suggestions, or comments:
+<p>Please feel free to contact us with any questions, suggestions, or comments:</p>
 <ul>
 <li>
 <p>Contact form: <a href="https://www.fsoco-dataset.com/contact_us/">www.fsoco-dataset.com/contact_us</a></p>

@@ -1,4 +1,5 @@
 import click
+from pathlib import Path
 
 from .similarity_scorer import SimilarityScorer
 from .utils.logger import Logger
@@ -39,6 +40,12 @@ from .utils.logger import Logger
     type=click.IntRange(0, 100),
     default=0,
 )
+@click.option(
+    "--cache_dir",
+    default=".",
+    help="Specify the folder to save cache files in. If not specified, the current directory will be used.",
+    type=click.Path(),
+)
 def similarity_scorer(
     image_glob,
     catch_wildcard_expansion,
@@ -49,6 +56,7 @@ def similarity_scorer(
     report_csv,
     debug,
     show,
+    cache_dir,
 ):
     """
     \b
@@ -104,6 +112,11 @@ def similarity_scorer(
 
     """
 
+    cache_dir = Path(cache_dir)
+    if not cache_dir.exists():
+        Logger.log_info(f"Create cache directory '{cache_dir}'.")
+    cache_dir.mkdir(parents=True, exist_ok=True)
+
     # check for non quoted image glob
     if len(catch_wildcard_expansion):
         Logger.log_error(
@@ -132,6 +145,7 @@ def similarity_scorer(
         report_csv=report_csv,
         debug=debug,
         show=show,
+        cache_dir=cache_dir,
     )
     checker.run()
 

@@ -1,0 +1,27 @@
+name: Label sanity checks
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  label_sanity_checks:
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python 3.6
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.6'
+
+      - name: Install dependencies
+        working-directory: ./tools
+        run: |
+          pip install --upgrade pip setuptools wheel
+          pip install --editable .[sly]
+
+      - name: Run sanity checks
+        run: fsoco sanity-checker -t "fsoco" -w "Image donations" -p "FSB Racing Team" -p "Einstein Motorsport" --token ${{secret.SLY_TOKEN}} --verbose --dry_run

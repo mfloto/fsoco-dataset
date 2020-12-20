@@ -18,16 +18,61 @@ def label_delete_tag(label, tag):
 class LabelChecker(ABC):
     # All implemented checker share the same object as a single image could contain different label types
     updated_annotation = None
+    is_annotation_updated = None
 
-    def __init__(self, image_name: str, updated_annotation, verbose: bool = False):
+    issue_tag_meta = sly.TagMeta(
+        name="issue", value_type=sly.TagValueType.ANY_STRING, color=[255, 0, 0]
+    )
+
+    def __init__(
+        self,
+        image_name: str,
+        image_height: int,
+        image_width: int,
+        project_meta,
+        updated_annotation,
+        apply_auto_fixes: bool,
+        verbose: bool = False,
+    ):
         super().__init__()
         self.image_name = image_name
+        self.project_meta = project_meta
+        self.apply_auto_fixes = apply_auto_fixes
         self.verbose = verbose
         LabelChecker.updated_annotation = updated_annotation
+        LabelChecker.is_annotation_updated = False
+
+        # We use these numbers to check for labels reaching into the watermark
+        self.image_height = image_height
+        self.image_width = image_width
 
     @abstractmethod
     def run(self, label: dict) -> bool:
         pass
+
+    @staticmethod
+    def _delete_label(label: dict):
+        # Search for this label in the updated_annotations object
+        for candidate_label in LabelChecker.updated_annotation.labels:
+            if candidate_label.geometry.sly_id == label["id"]:
+                LabelChecker.updated_annotation = LabelChecker.updated_annotation.delete_label(
+                    candidate_label
+                )
+                LabelChecker.is_annotation_updated = True
+                break
+
+    @staticmethod
+    def _update_label(updated_label):
+        # Search for this label in the updated_annotations object
+        for candidate_label in LabelChecker.updated_annotation.labels:
+            if candidate_label.geometry.sly_id == updated_label.geometry.sly_id:
+                LabelChecker.updated_annotation = LabelChecker.updated_annotation.delete_label(
+                    candidate_label
+                ).add_label(
+                    updated_label
+                )
+                LabelChecker.is_annotation_updated = True
+                break
 
     @staticmethod
     def _update_issue_tag(label: dict, tag_text: str, found_issue: bool):
@@ -45,14 +90,15 @@ class LabelChecker(ABC):
         # Search for this label in the updated_annotations object
         for candidate_label in LabelChecker.updated_annotation.labels:
             if candidate_label.geometry.sly_id == label["id"]:
-                tagged_label = candidate_label.add_tag(
-                    LabelChecker._create_issue_tag(tag_text)
+                updated_label = candidate_label.add_tag(
+                    sly.Tag(meta=LabelChecker.issue_tag_meta, value=tag_text)
                 )
                 LabelChecker.updated_annotation = LabelChecker.updated_annotation.delete_label(
                     candidate_label
                 ).add_label(
-                    tagged_label
+                    updated_label
                 )
+                LabelChecker.is_annotation_updated = True
                 break
 
     @staticmethod
@@ -60,30 +106,27 @@ class LabelChecker(ABC):
         if not LabelChecker._is_issue_tagged(label, tag_text):
             return
 
-        # Search for all of these label and delete them
+        # Search for this label in the updated_annotations object
         for candidate_label in LabelChecker.updated_annotation.labels:
             if candidate_label.geometry.sly_id == label["id"]:
-                tagged_label = label_delete_tag(
-                    candidate_label, LabelChecker._create_issue_tag(tag_text)
+                updated_label = label_delete_tag(
+                    candidate_label,
+                    sly.Tag(meta=LabelChecker.issue_tag_meta, value=tag_text),
                 )
                 LabelChecker.updated_annotation = LabelChecker.updated_annotation.delete_label(
                     candidate_label
                 ).add_label(
-                    tagged_label
+                    updated_label
                 )
+                LabelChecker.is_annotation_updated = True
                 break
 
     @staticmethod
     def _is_issue_tagged(label: dict, tag_text: str):
         for tag in label["tags"]:
-            if tag["name"] == "Issue" and tag["value"] == tag_text:
+            if (
+                tag["name"] == LabelChecker.issue_tag_meta.name
+                and tag["value"] == tag_text
+            ):
                 return True
         return False
-
-    @staticmethod
-    def _create_issue_tag(tag_text: str):
-        issue_tag_meta = sly.TagMeta(
-            name="Issue", value_type=sly.TagValueType.ANY_STRING
-        )
-        issue_tag = sly.Tag(meta=issue_tag_meta, value=tag_text)
-        return issue_tag

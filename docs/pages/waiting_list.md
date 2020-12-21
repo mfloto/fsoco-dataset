@@ -11,6 +11,7 @@ bootstrap: false
 <style>
     iframe{
         border-style: none;
+        width: 100%;
     }
 </style>
 

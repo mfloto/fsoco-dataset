@@ -30,7 +30,7 @@ document.forms[0].onsubmit = function(event){
     event.preventDefault();
     var team_email = document.getElementById("email").value;
     var  url = "https://script.google.com/macros/s/AKfycbzXJ_Y-oeg4-j-N0OqnziNfwolcht42pKblNiUwXFuAhWDuA6Q/exec" + "?email=" + team_email;
-    console.log(team_email);
+    // Set iframe target to HTML waiting position web app response
     document.getElementById("waiting_list_position").src = url;
 };
 </script>

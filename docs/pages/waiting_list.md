@@ -16,7 +16,7 @@ bootstrap: false
 </style>
 
 <h1>Waiting List Position Display</h1>
-Please input the e-mail address you used for the contribution procedure contact form.
+Please enter the same email address you used for the contribution procedure contact form.
 This should be the address that received an automatic response from us to confirm your application for contribution.
 <form id="waiting_list_form">
     <label for="email">E-Mail Address:</label>

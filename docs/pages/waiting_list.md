@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Contribution Procedure Waiting List"
+title: "Waiting List Status"
 permalink: /waiting_list
 feature-img: assets/img/fsg/HD/fsg_laptop.jpg
 feature-img-credits: Photo ©FSG Sturm
@@ -16,10 +16,12 @@ bootstrap: false
 </style>
 
 <h1>Waiting List Position Display</h1>
-Please input the e-mail address you used for the contribution procedure contact form.
+
+Please enter the same email address you used for the contribution procedure contact form.
 This should be the address that has received an automatic response from us to confirm the successful submission of the form.
+
 <form id="waiting_list_form">
-    <label for="email">E-Mail Address:</label>
+    <label for="email">Email address:</label>
     <input id="email" type="email" name="email" required/>
     <input type="submit" />
 </form>
@@ -48,4 +50,3 @@ document.forms[0].onsubmit = function(event){
     };
 };
 </script>
-

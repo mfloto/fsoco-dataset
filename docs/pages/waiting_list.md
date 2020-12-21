@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "Contribution Procedure Waiting List"
+title: "Waiting List Status"
 permalink: /waiting_list
 feature-img: assets/img/fsg/HD/fsg_laptop.jpg
 feature-img-credits: Photo ©FSG Sturm
@@ -48,4 +48,3 @@ document.forms[0].onsubmit = function(event){
     };
 };
 </script>
-

@@ -31,11 +31,14 @@ This should be the address that has received an automatic response from us to co
 > This page uses JavaScript to handle your input. Please make sure to enable client-side usage.<br>
 > Additionally, if you experience issues and receive a "Sorry, unable to open the file at present." Google Drive error, either log out of all your Google Accounts or open this page in incognito mode.
 <h3 id="loading_text" style="display:none;">Loading...</h3>
-<h3 id="waiting_list_title" style="display:none;">Your waiting list position is in the following range: </h3><iframe id="waiting_list_position"></iframe>
-
+<div id="waiting_list_container" style="display:none;">
+  <h3>Your waiting list position is in the following range: </h3><iframe id="waiting_list_position"></iframe>
+</div>
 <script>
 document.forms[0].onsubmit = function(event){
     event.preventDefault();
+    // Hiide position container
+    document.getElementById("waiting_list_container").style.display = "none";
     // Show loading text
     document.getElementById("loading_text").style.display = "block";
     var team_email = document.getElementById("email").value;
@@ -45,8 +48,8 @@ document.forms[0].onsubmit = function(event){
     document.getElementById("waiting_list_position").onload = function() {
         // Hide loading text
         document.getElementById("loading_text").style.display = "none";
-        // Unhide position text
-        document.getElementById("waiting_list_title").style.display = "block";
+        // Unhide position container
+        document.getElementById("waiting_list_container").style.display = "block";
     };
 };
 </script>

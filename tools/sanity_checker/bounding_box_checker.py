@@ -11,6 +11,9 @@ class BoundingBoxChecker(LabelChecker):
             raise ValueError(
                 f"Wrong label type: {label['geometryType']}. Expected: rectangle."
             )
+        # Do not run the checker on labels tagged as "resolved"
+        if LabelChecker._is_resolved_tagged(label):
+            return True
         # Run all checks on the same label.
         self.label = label
 

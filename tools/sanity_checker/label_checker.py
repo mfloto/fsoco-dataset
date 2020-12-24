@@ -24,6 +24,9 @@ class LabelChecker(ABC):
     issue_tag_meta = sly.TagMeta(
         name="issue", value_type=sly.TagValueType.ANY_STRING, color=[255, 0, 0]
     )
+    resolved_tag_meta = sly.TagMeta(
+        name="resolved", value_type=sly.TagValueType.NONE, color=[0, 255, 0]
+    )
 
     def __init__(
         self,
@@ -132,5 +135,12 @@ class LabelChecker(ABC):
                 tag["name"] == LabelChecker.issue_tag_meta.name
                 and tag["value"] == tag_text
             ):
+                return True
+        return False
+
+    @staticmethod
+    def _is_resolved_tagged(label: dict):
+        for tag in label["tags"]:
+            if tag["name"] == LabelChecker.resolved_tag_meta.name:
                 return True
         return False

@@ -1,4 +1,4 @@
-FROM sylhare/type-on-strap:latest
+FROM sylhare/type-on-strap:jessie
 
 WORKDIR /app/
 COPY docs/. /app/

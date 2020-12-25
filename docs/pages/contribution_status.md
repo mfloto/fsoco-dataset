@@ -21,7 +21,7 @@ bootstrap: false
 Please enter the same email address you used for the contribution procedure contact form.
 This should be the address that has received an automatic response from us to confirm the successful submission of the form.
 
-<form id="waiting_list_form">
+<form id="contrib_status_form">
     <label for="email">Email address:</label>
     <input id="email" type="email" name="email" required/>
     <input type="submit" />

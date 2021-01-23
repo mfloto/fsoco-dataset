@@ -1,5 +1,6 @@
 import click
 from pathlib import Path
+from typing import Tuple
 
 from similarity_scorer.utils.logger import Logger
 from .sanity_checker import SanityChecker
@@ -24,9 +25,14 @@ from .sanity_checker import SanityChecker
     "--project_name",
     "-p",
     type=str,
-    required=True,
     multiple=True,
     help="Specify a Supervisely project name. You can use this option multiple times.",
+)
+@click.option(
+    "--whitelist/--blacklist",
+    "projects_whitelisted",
+    default=True,
+    help="Decide whether to white- or blacklist the specified Supervisely projects. Default is whitelisting.",
 )
 @click.option(
     "--token",
@@ -58,9 +64,10 @@ from .sanity_checker import SanityChecker
 def sanity_checker(
     team_name: str,
     workspace_name: str,
-    project_name: tuple,
+    project_name: Tuple[str, ...],
+    projects_whitelisted: bool,
     server_token: str,
-    label_type: tuple,
+    label_type: Tuple[str, ...],
     results_path: str,
     dry_run: bool,
     verbose: bool,
@@ -78,6 +85,7 @@ def sanity_checker(
         workspace_name,
         project_name,
         label_type,
+        projects_whitelisted,
         dry_run,
         verbose,
     )

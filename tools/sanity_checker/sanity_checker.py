@@ -8,6 +8,8 @@ from tqdm import tqdm
 
 from similarity_scorer.utils.logger import Logger
 from .bounding_box_checker import BoundingBoxChecker
+from .checker import Checker
+from .image_checker import ImageChecker
 from .label_checker import LabelChecker
 from .segmentation_checker import SegmentationChecker
 from .utils import safe_request, extract_geometry_type_from_job_name
@@ -285,6 +287,12 @@ class SanityChecker:
                     updated_annotation = sly.Annotation.from_json(
                         image.annotation, project_meta
                     )
+                    image_checker = ImageChecker(
+                        image.image_name,
+                        updated_annotation,
+                        not self.dry_run,
+                        self.verbose,
+                    )
                     bounding_box_checker = BoundingBoxChecker(
                         image.image_name,
                         image.annotation["size"]["height"],
@@ -310,6 +318,9 @@ class SanityChecker:
                         image.image_name, "bitmap"
                     )
 
+                    # Run image-level checks
+                    image_checker.run()
+
                     # Iterate over labels in current image
                     for label in image.annotation["objects"]:
                         if not label["geometryType"] in self.label_types_to_check:
@@ -325,21 +336,21 @@ class SanityChecker:
                             )
 
                     # Assertion that the memory still matches
-                    if id(bounding_box_checker.updated_annotation) != id(
-                        segmentation_checker.updated_annotation
-                    ) or id(bounding_box_checker.updated_annotation) != id(
-                        LabelChecker.updated_annotation
+                    if (
+                        id(Checker.updated_annotation)
+                        != id(image_checker.updated_annotation)
+                        or id(Checker.updated_annotation)
+                        != id(bounding_box_checker.updated_annotation)
+                        or id(Checker.updated_annotation)
+                        != id(segmentation_checker.updated_annotation)
                     ):
                         raise RuntimeError("Memory addresses do not match.")
 
-                    # One of the label checkers changed the labels
-                    if (
-                        bounding_box_checker.is_annotation_updated
-                        or segmentation_checker.is_annotation_updated
-                    ):
+                    # One of the checkers changed the annotation (image tags or labels)
+                    if Checker.is_annotation_updated:
                         updated_annotations["image_ids"].append(image.image_id)
                         updated_annotations["annotations"].append(
-                            LabelChecker.updated_annotation
+                            Checker.updated_annotation
                         )
 
                     # Count number of issues and labels in this image

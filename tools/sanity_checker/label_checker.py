@@ -1,9 +1,11 @@
-import functools
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import Optional, Dict, Any
+import functools
 
 import supervisely_lib as sly
 from supervisely_lib.annotation.tag_collection import TagCollection
+
+from .checker import Checker
 
 
 # ToDo: This is how it should be done if the API would support it
@@ -28,10 +30,7 @@ def check_label_existence(func):
     return wrapper
 
 
-class LabelChecker(ABC):
-    # All implemented checker share the same object as a single image could contain different label types
-    updated_annotation = None
-    is_annotation_updated = None
+class LabelChecker(Checker):
 
     issue_tag_meta = sly.TagMeta(
         name="issue", value_type=sly.TagValueType.ANY_STRING, color=[255, 0, 0]
@@ -50,94 +49,83 @@ class LabelChecker(ABC):
         apply_auto_fixes: bool,
         verbose: bool = False,
     ):
-        super().__init__()
-        self.image_name = image_name
+        super().__init__(image_name, updated_annotation, apply_auto_fixes, verbose)
         self.project_meta = project_meta
-        self.apply_auto_fixes = apply_auto_fixes
-        self.verbose = verbose
-        LabelChecker.updated_annotation = updated_annotation
-        LabelChecker.is_annotation_updated = False
 
         # We use these numbers to check for labels reaching into the watermark
         self.image_height = image_height
         self.image_width = image_width
 
         # The checks run on this object
-        self.label: Optional[dict] = None
+        self.label: Optional[Dict[str, Any]] = None
 
     @abstractmethod
-    def run(self, label: dict) -> bool:
-        pass
+    def run(self, label: Dict[str, Any]) -> bool:  # pylint: disable=arguments-differ
+        raise NotImplementedError
 
     @staticmethod
-    def _delete_label(label: dict):
+    def _delete_label(label: Dict[str, Any]):
         # Search for this label in the updated_annotations object
-        for candidate_label in LabelChecker.updated_annotation.labels:
+        for candidate_label in Checker.updated_annotation.labels:
             if candidate_label.geometry.sly_id == label["id"]:
-                LabelChecker.updated_annotation = (
-                    LabelChecker.updated_annotation.delete_label(candidate_label)
+                Checker.updated_annotation = Checker.updated_annotation.delete_label(
+                    candidate_label
                 )
-                LabelChecker.is_annotation_updated = True
+                Checker.is_annotation_updated = True
                 break
 
     @staticmethod
     def _update_label(updated_label):
         # Search for this label in the updated_annotations object
-        for candidate_label in LabelChecker.updated_annotation.labels:
+        for candidate_label in Checker.updated_annotation.labels:
             if candidate_label.geometry.sly_id == updated_label.geometry.sly_id:
-                LabelChecker.updated_annotation = (
-                    LabelChecker.updated_annotation.delete_label(
-                        candidate_label
-                    ).add_label(updated_label)
-                )
-                LabelChecker.is_annotation_updated = True
+                Checker.updated_annotation = Checker.updated_annotation.delete_label(
+                    candidate_label
+                ).add_label(updated_label)
+                Checker.is_annotation_updated = True
                 break
 
     @staticmethod
-    def _update_issue_tag(label: dict, tag_text: str, found_issue: bool):
+    def _update_issue_tag(label: Dict[str, Any], tag_text: str, found_issue: bool):
         if found_issue:
             LabelChecker._add_issue_tag(label, tag_text)
         else:
             LabelChecker._delete_issue_tag(label, tag_text)
 
     @staticmethod
-    def _add_issue_tag(label: dict, tag_text: str):
+    def _add_issue_tag(label: Dict[str, Any], tag_text: str):
         # Do not tag multiple times
         if LabelChecker.is_issue_tagged(label, tag_text):
             return
 
         # Search for this label in the updated_annotations object
-        for candidate_label in LabelChecker.updated_annotation.labels:
+        for candidate_label in Checker.updated_annotation.labels:
             if candidate_label.geometry.sly_id == label["id"]:
                 updated_label = candidate_label.add_tag(
                     sly.Tag(meta=LabelChecker.issue_tag_meta, value=tag_text)
                 )
-                LabelChecker.updated_annotation = (
-                    LabelChecker.updated_annotation.delete_label(
-                        candidate_label
-                    ).add_label(updated_label)
-                )
-                LabelChecker.is_annotation_updated = True
+                Checker.updated_annotation = Checker.updated_annotation.delete_label(
+                    candidate_label
+                ).add_label(updated_label)
+                Checker.is_annotation_updated = True
                 break
 
     @staticmethod
-    def _delete_issue_tag(label: dict, tag_text: str):
+    def _delete_issue_tag(label: Dict[str, Any], tag_text: str):
         if not LabelChecker.is_issue_tagged(label, tag_text):
             return
 
         # Search for this label in the updated_annotations object
-        for candidate_label in LabelChecker.updated_annotation.labels:
+        for candidate_label in Checker.updated_annotation.labels:
             if candidate_label.geometry.sly_id == label["id"]:
                 updated_label = label_delete_tag(
                     candidate_label,
                     sly.Tag(meta=LabelChecker.issue_tag_meta, value=tag_text),
                 )
-                LabelChecker.updated_annotation = (
-                    LabelChecker.updated_annotation.delete_label(
-                        candidate_label
-                    ).add_label(updated_label)
-                )
-                LabelChecker.is_annotation_updated = True
+                Checker.updated_annotation = Checker.updated_annotation.delete_label(
+                    candidate_label
+                ).add_label(updated_label)
+                Checker.is_annotation_updated = True
                 break
 
     @staticmethod

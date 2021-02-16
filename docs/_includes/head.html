@@ -38,7 +38,18 @@
     
      <!--Mermaid JS for easy chart rendering-->
     <script type="text/javascript" src="https://unpkg.com/mermaid@8.5.1/dist/mermaid.min.js"></script>
-    <script type="text/javascript">mermaid.initialize({startOnLoad:true});</script>
+    <script type="text/javascript">mermaid.initialize(
+    {
+        "startOnLoad": true, 
+        "theme": "default", 
+        "themeVariables": 
+            { 
+                "primaryColor": "#ffff00",
+                "nodeBorder": "#000000",
+                "background": "black",
+                "mainBkg": "#ffffaa"
+            }
+    });</script>
 
 
     <!-- Google Analytics -->

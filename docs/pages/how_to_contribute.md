@@ -72,34 +72,41 @@ They are based on the experience with the first version of FSOCO.
 
 ### Step-by-step Manual
 
+<!-- Comment via script because of unfortunate Mermaid syntax -->
+<script>
+/*
 <div class="mermaid">
+%%{init: {"theme": "default", "themeVariables": { "primaryColor": "#ffff00", "nodeBorder": "#000000", "background": "black", "mainBkg": "#ffffaa" }}}%%
 stateDiagram
+  state fork_state <<fork>>
+  state join_state <<join>>
+    state "Team Ready" as s0: Waiting List = True
+    state "Labeling Exam" as s1: 
+    state "FSOCO Ready" as s2:
+    state "Pre-label adjustment" as s3: Label and tag all the Cones
+    state "Review Implementation" as s4:
+    state "FSOCO Review" as s5:
+    state "FSOCO Done" as s6: Team added as contributor
     
-    state "FSOCO OFF" as s0: Perception Tests = Doing
-    state "Manual Driving" as s1:  Label Parties = ∞ 
-    state "FSOCO Ready" as s2: Preparation = Done
-    state "FSOCO Driving" as s3: Label all the Cones
-    state "FSOCO Emergency" as s4: FAQ = Reading
-    state "FSOCO Finished" as s5: Contribution = Approved
     
-    note left of s1
-            Important information!
-            Overfitting is a real danger
-            to your car's suspension and aero. 
-    end note
-    [*] --> s0
-    s0 --> s1: More data needed
-    s1 --> s0: Labelers exhausted
-    s0 --> s2
-    s2 --> s4
-    s2 --> s3: Dataset assigned
-    s3 --> s4
-    s3 --> s5: Finished labeling
-    s2 --> s5: Uploaded own dataset
-    s5 --> [*]: Access granted
-    s5 --> s4
-</div>
 
+    [*] --> s0: Labeling guidelines read
+    s0 --> s1: Free slot
+    s1 --> s2: Exam passed
+    s2 --> fork_state
+    fork_state --> s3: Donations dataset assigned
+    s3 --> join_state: Finished labeling
+    fork_state --> join_state: Uploaded own dataset
+    join_state --> s5
+    s5 --> s6: Review passed
+    s5 --> s4: Improvements needed
+    s4 --> s5: Feedback addressed
+    s6 --> [*]
+</div>
+*/
+</script>
+
+<img src="../assets/img/examples/contribution_process.svg" style="width: 60%;  height: auto; float:center;">
 
 #### Preparation
 

@@ -75,15 +75,17 @@ They are based on the experience with the first version of FSOCO.
 <!-- Comment via script because of unfortunate Mermaid syntax -->
 <script>
 /*
+For prototyping/theming: https://mermaid-js.github.io/mermaid-live-editor
 <div class="mermaid">
-%%{init: {"theme": "default", "themeVariables": { "primaryColor": "#ffff00", "nodeBorder": "#000000", "background": "black", "mainBkg": "#ffffaa" }}}%%
+%%{init: {"theme": "default", "themeVariables": { "primaryColor": #aeceea", "nodeBorder": "black", "background": "black", "mainBkg": "#3884c7", "textColor": "#222222", "labelColor": "#ffffff" }}}%%
+
 stateDiagram
   state fork_state <<fork>>
   state join_state <<join>>
-    state "Team Ready" as s0: Waiting List = True
+    state "Team Ready" as s0: Waiting list = True
     state "Labeling Exam" as s1: 
     state "FSOCO Ready" as s2:
-    state "Pre-label adjustment" as s3: Label and tag all the Cones
+    state "Pre-label Adjustment" as s3: Label and tag all the Cones
     state "Review Implementation" as s4:
     state "FSOCO Review" as s5:
     state "FSOCO Done" as s6: Team added as contributor

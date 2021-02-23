@@ -77,7 +77,7 @@ They are based on the experience with the first version of FSOCO.
 /*
 For prototyping/theming: https://mermaid-js.github.io/mermaid-live-editor
 <div class="mermaid">
-%%{init: {"theme": "default", "themeVariables": { "primaryColor": #aeceea", "nodeBorder": "black", "background": "black", "mainBkg": "#3884c7", "textColor": "#222222", "labelColor": "#ffffff" }}}%%
+%%{init: {"theme": "default", "themeVariables": { "primaryColor": "white", "nodeBorder": "black", "background": "#3884c7", "mainBkg": "#3884c7", "textColor": "#222222", "labelColor": "#ffffff" }}}%%
 
 stateDiagram
   state fork_state <<fork>>
@@ -101,8 +101,8 @@ stateDiagram
     fork_state --> join_state: Uploaded own dataset
     join_state --> s5
     s5 --> s6: Review passed
-    s5 --> s4: Improvements needed
-    s4 --> s5: Feedback addressed
+    s5 --> s4: Issues found
+    s4 --> s5: Issues fixed
     s6 --> [*]
 </div>
 */

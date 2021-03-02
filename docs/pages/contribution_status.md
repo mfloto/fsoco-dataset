@@ -21,10 +21,10 @@ bootstrap: false
 Please enter the same email address you used for the contribution procedure contact form.
 This should be the address that has received an automatic response from us to confirm the successful submission of the form.
 
-<form id="contrib_status_form">
+<form id="contrib_status_form" target="_status_iframe">
     <label for="email">Email address:</label>
     <input id="email" type="email" name="email" required/>
-    <input type="submit" />
+    <input id="submit_button" type="submit" />
 </form>
 
 > **Note**
@@ -33,7 +33,7 @@ This should be the address that has received an automatic response from us to co
 > Additionally, if you experience issues and receive a "Sorry, unable to open the file at present." Google Drive error, either log out of all your Google Accounts or open this page in incognito mode.
 <h3 id="loading_text" style="display:none;">Loading...</h3>
 <div id="contrib_procedure_container" style="display:none;">
-  <iframe id="contribution_procedure_status"></iframe>
+  <iframe name="_status_iframe" id="contribution_procedure_status"></iframe>
   <h3>Job Status Legend</h3>
   <table id="job_status_legend">
       <thead>
@@ -61,7 +61,7 @@ This should be the address that has received an automatic response from us to co
     </table>
 </div>
 <script>
-document.forms[0].onsubmit = function(event){
+document.forms[0].onsubmit = function(event) {
     event.preventDefault();
     // Hide position container
     document.getElementById("contrib_procedure_container").style.display = "none";
@@ -78,6 +78,18 @@ document.forms[0].onsubmit = function(event){
         document.getElementById("loading_text").style.display = "none";
         // Unhide position container
         document.getElementById("contrib_procedure_container").style.display = "block";
+    };
+};
+// Handle parameters for pre-filled contribution status page
+window.onload = function () {
+    // Check iframe src
+    if (iframe = document.getElementById("contribution_procedure_status").src == "") {
+        (new URL(window.location.href)).searchParams.forEach(
+            (val, param) => document.getElementsByName(param).forEach(
+            (el) => el.value = val)
+        );
+        // Submit form if there's pre-filled input
+        document.getElementById("submit_button").click() 
     };
 };
 </script>

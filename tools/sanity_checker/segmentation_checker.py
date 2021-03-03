@@ -118,6 +118,8 @@ class SegmentationChecker(LabelChecker):
                 self._update_bitmap_data()
                 # Remove issue tag if it previously existed
                 self._delete_issue_tag(self.label, "Inside watermark")
+                # Increment fixed_issue counter
+                self._increment_fixed_issue_tag(self.label)
 
         if self.verbose and is_outside_image_frame:
             log_text = f"{self.image_name} | segmentation | inside watermark"
@@ -144,6 +146,8 @@ class SegmentationChecker(LabelChecker):
             self._update_bitmap_data()
             # Remove issue tag if it previously existed
             self._delete_issue_tag(self.label, "Ghost bounding box")
+            # Increment fixed_issue counter
+            self._increment_fixed_issue_tag(self.label)
 
         if self.verbose and is_ghost_bounding_box:
             log_text = f"{self.image_name} | segmentation | ghost bounding box"
@@ -192,6 +196,8 @@ class SegmentationChecker(LabelChecker):
             self._update_bitmap_data()
             # Remove issue tag if it previously existed
             self._delete_issue_tag(self.label, "Perforated label")
+            # Increment fixed_issue counter
+            self._increment_fixed_issue_tag(self.label)
 
         self._update_issue_tag(self.label, "Perforated label", is_perforated)
 
@@ -231,6 +237,8 @@ class SegmentationChecker(LabelChecker):
                 self._update_bitmap_data()
                 # Remove issue tag if it previously existed
                 self._delete_issue_tag(self.label, "Separated label")
+                # Increment fixed_issue counter
+                self._increment_fixed_issue_tag(self.label)
         if remove_label:
             self._delete_label(self.label)
 

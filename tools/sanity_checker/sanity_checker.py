@@ -195,6 +195,14 @@ class SanityChecker:
                     sly_project.name
                 ].add_tag_meta(LabelChecker.resolved_tag_meta)
                 update_project_meta = True
+            # Add "fixed_issue" tag if it does not exist yet
+            if LabelChecker.fixed_issue_tag_meta.name not in [
+                tag["name"] for tag in project_meta_json["tags"]
+            ]:
+                self.sly_project_metas[sly_project.name] = self.sly_project_metas[
+                    sly_project.name
+                ].add_tag_meta(LabelChecker.fixed_issue_tag_meta)
+                update_project_meta = True
             if update_project_meta:
                 safe_request(
                     self.sly_api.project.update_meta,

@@ -35,6 +35,9 @@ class LabelChecker(Checker):
     issue_tag_meta = sly.TagMeta(
         name="issue", value_type=sly.TagValueType.ANY_STRING, color=[255, 0, 0]
     )
+    fixed_issue_tag_meta = sly.TagMeta(
+        name="fixed_issue", value_type=sly.TagValueType.ANY_NUMBER, color=[0, 0, 255]
+    )
     resolved_tag_meta = sly.TagMeta(
         name="resolved", value_type=sly.TagValueType.NONE, color=[0, 255, 0]
     )
@@ -111,6 +114,25 @@ class LabelChecker(Checker):
                 break
 
     @staticmethod
+    def _increment_fixed_issue_tag(label: Dict[str, Any]):
+        # Search for this label in the updated_annotations object
+        for candidate_label in Checker.updated_annotation.labels:
+            if candidate_label.geometry.sly_id == label["id"]:
+                counter = LabelChecker.get_fixed_issue_tag_value(label)
+                updated_label = label_delete_tag(
+                    candidate_label,
+                    sly.Tag(meta=LabelChecker.fixed_issue_tag_meta, value=counter),
+                )
+                updated_label = updated_label.add_tag(
+                    sly.Tag(meta=LabelChecker.fixed_issue_tag_meta, value=counter + 1)
+                )
+                Checker.updated_annotation = Checker.updated_annotation.delete_label(
+                    candidate_label
+                ).add_label(updated_label)
+                Checker.is_annotation_updated = True
+                break
+
+    @staticmethod
     def _delete_issue_tag(label: Dict[str, Any], tag_text: str):
         if not LabelChecker.is_issue_tagged(label, tag_text):
             return
@@ -144,6 +166,13 @@ class LabelChecker(Checker):
             LabelChecker.resolved_tag_meta.name,
             LabelChecker.resolved_tag_meta.value_type,
         )
+
+    @staticmethod
+    def get_fixed_issue_tag_value(label: Dict[str, Any]) -> int:
+        return (
+            [tag["value"] for tag in label["tags"] if tag["name"] == "fixed_issue"]
+            or [0]
+        )[0]
 
     @staticmethod
     def is_tagged(

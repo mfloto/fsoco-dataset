@@ -73,13 +73,18 @@ class SanityChecker:
         total_issues = str(
             sum([job["number_issues"] for job in self.job_statistics.values()])
         )
+        total_fixed = str(
+            sum([job["number_fixed"] for job in self.job_statistics.values()])
+        )
         labels_just = len(total_labels)
         issues_just = len(total_issues)
+        fixed_just = len(total_fixed)
         for job_name, job_statistics in self.job_statistics.items():
             new_line = (
                 f"{job_name.ljust(max_length_job_name)}"
                 + f" | labels = {str(job_statistics['number_labels']).rjust(labels_just)}"
-                + f" | issues = {str(job_statistics['number_issues']).rjust(issues_just)}\n"
+                + f" | issues = {str(job_statistics['number_issues']).rjust(issues_just)}"
+                + f" | fixed = {str(job_statistics['number_fixed']).rjust(fixed_just)}\n"
             )
             string += new_line
             max_length_line = max(max_length_line, len(new_line))
@@ -88,7 +93,8 @@ class SanityChecker:
         string += (
             " " * max_length_job_name
             + f" | labels = {total_labels.rjust(labels_just)}"
-            + f" | issues = {total_issues.rjust(issues_just)}\n"
+            + f" | issues = {total_issues.rjust(issues_just)}"
+            + f" | fixed = {total_fixed.rjust(fixed_just)}\n"
         )
         string += "-" * max_length_line
         return string
@@ -189,6 +195,14 @@ class SanityChecker:
                     sly_project.name
                 ].add_tag_meta(LabelChecker.resolved_tag_meta)
                 update_project_meta = True
+            # Add "fixed_issue" tag if it does not exist yet
+            if LabelChecker.fixed_issue_tag_meta.name not in [
+                tag["name"] for tag in project_meta_json["tags"]
+            ]:
+                self.sly_project_metas[sly_project.name] = self.sly_project_metas[
+                    sly_project.name
+                ].add_tag_meta(LabelChecker.fixed_issue_tag_meta)
+                update_project_meta = True
             if update_project_meta:
                 safe_request(
                     self.sly_api.project.update_meta,
@@ -228,6 +242,7 @@ class SanityChecker:
                 "geometry_type": geometry_type,
                 "number_labels": 0,
                 "number_issues": 0,
+                "number_fixed": 0,
             }
 
     def _get_image_job_names(self, image_name: str, geometry_type: str) -> List[str]:
@@ -248,6 +263,7 @@ class SanityChecker:
         dataset_name: str,
         geometry_type: str,
         found_issue: bool = False,
+        fixed_issue: int = 0,
     ):
         # Create pseudo job for "project - dataset - geometry" to account for images that are not assigned to any job
         pseudo_job_name = f"{project_name} - {dataset_name} - {geometry_type}"
@@ -256,10 +272,11 @@ class SanityChecker:
                 "geometry_type": geometry_type,
                 "number_labels": 0,
                 "number_issues": 0,
+                "number_fixed": 0,
             }
         self.job_statistics[pseudo_job_name]["number_labels"] += 1
-        if found_issue:
-            self.job_statistics[pseudo_job_name]["number_issues"] += 1
+        self.job_statistics[pseudo_job_name]["number_issues"] += int(found_issue)
+        self.job_statistics[pseudo_job_name]["number_fixed"] += fixed_issue
 
     def _run_project(self, project, project_meta):
         for dataset in self.datasets[project.name]:
@@ -318,25 +335,6 @@ class SanityChecker:
                         image.image_name, "bitmap"
                     )
 
-                    if (
-                        project_name == "Donations"
-                        and bounding_box_job_names
-                        and not (
-                            "MAD" in bounding_box_job_names[0]
-                            or "UG" in bounding_box_job_names[0]
-                        )
-                    ):
-                        bounding_box_job_names = []
-                    if (
-                        project_name == "Donations"
-                        and segmentation_job_names
-                        and not (
-                            "MAD" in segmentation_job_names[0]
-                            or "UG" in segmentation_job_names[0]
-                        )
-                    ):
-                        segmentation_job_names = []
-
                     # Run image-level checks
                     image_checker.run()
 
@@ -379,6 +377,7 @@ class SanityChecker:
                         found_issue = LabelChecker.is_issue_tagged(
                             label
                         ) and not LabelChecker.is_resolved_tagged(label)
+                        fixed_issues = LabelChecker.get_fixed_issue_tag_value(label)
                         if label["geometryType"] == "rectangle":
                             if bounding_box_job_names:
                                 for job_name in bounding_box_job_names:
@@ -386,9 +385,16 @@ class SanityChecker:
                                     self.job_statistics[job_name][
                                         "number_issues"
                                     ] += int(found_issue)
+                                    self.job_statistics[job_name][
+                                        "number_fixed"
+                                    ] += fixed_issues
                             else:
                                 self._found_label_in_jobless_image(
-                                    project_name, dataset.name, "rectangle", found_issue
+                                    project_name,
+                                    dataset.name,
+                                    "rectangle",
+                                    found_issue,
+                                    fixed_issues,
                                 )
                         elif label["geometryType"] == "bitmap":
                             if segmentation_job_names:
@@ -397,9 +403,16 @@ class SanityChecker:
                                     self.job_statistics[job_name][
                                         "number_issues"
                                     ] += int(found_issue)
+                                    self.job_statistics[job_name][
+                                        "number_fixed"
+                                    ] += fixed_issues
                             else:
                                 self._found_label_in_jobless_image(
-                                    project_name, dataset.name, "bitmap", found_issue
+                                    project_name,
+                                    dataset.name,
+                                    "bitmap",
+                                    found_issue,
+                                    fixed_issues,
                                 )
 
                     pbar.update(1)

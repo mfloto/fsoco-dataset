@@ -84,6 +84,8 @@ class BoundingBoxChecker(LabelChecker):
             self._update_rectangle_data()
             # Remove issue tag if it previously existed
             self._delete_issue_tag(self.label, "Inside watermark")
+            # Increment fixed_issue counter
+            self._increment_fixed_issue_tag(self.label)
 
         if self.verbose and is_outside_image_frame:
             log_text = f"{self.image_name} | bounding box | inside watermark"

@@ -1,14 +1,22 @@
-<script type="text/javascript">var submitted=false;</script>
-<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submitted)  {window.location='/contact_form_thanks/';}"></iframe>
+<!--<script type="text/javascript">var submitted=false;</script>-->
+<script src="https://www.google.com/recaptcha/api.js"></script>
+
+<!--<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submitted)  {window.location='/contact_form_thanks/';}"></iframe>-->
 
 <div class="form-style">
-  <form class="form" action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSdD_sTwrwsuvDkjsNq_LVWWNaUhsIdPfEwaY2-6ZXUVBymXVw/formResponse" method="post" target="hidden_iframe" onsubmit="submitted=true;">
+  <form class="form" method="post" action="https://fsoco-staticman.herokuapp.com/v2/entry/github/fsoco/fsoco-dataset/master/">
+<!--  <form class="form" action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSdD_sTwrwsuvDkjsNq_LVWWNaUhsIdPfEwaY2-6ZXUVBymXVw/formResponse" method="post" target="hidden_iframe" onsubmit="submitted=true;">-->
     <fieldset>
       <input name="entry.1113691336" type="text" placeholder="Your name" required />
       <input name="entry.1561061353" type="email" placeholder="Your email" required />
       <textarea name="entry.1522606929" placeholder="Type your message"></textarea>
     </fieldset>
     <fieldset>
+      <input type="hidden" name="options[reCaptcha][siteKey]" value="6LcHheMaAAAAAC3cGLv2YBq0ENFszJjQ_WYF4Sbz">
+      <input type="hidden" name="options[reCaptcha][secret]" value="lE+w5120ceVpKlxwfQWJ9Xw6rxw2NJL9a2uNawjk32mcGRPzPzadMaLqNt+3ocd+yG9tsYbnAMvYPxEzGiXhkF/qBoqtMjBtjUL3diTYIUWTDjXQEAupY3eMCm5KkKSAoK/zLYwV7pBqIbxDUZdD7Yapo4S2alCmEZUq+X7FyHP1KnHX3tb+ghRDR5VrmqetOKjHslCOhWlSldNY8GJgyFjK0MVQI/p2BTAHsedEeNCfTwVxiLnj3780YJYhp8mZDZ49Ws5J/IGItiIlJKxflA6v49u+CDNrBTgMNCLblOFjUERitoA5Bip3yvvqcZuQ66ZB/j1R5DTBx+LOawsCMA==">
+
+      <div class="g-recaptcha" data-sitekey="6LcHheMaAAAAAC3cGLv2YBq0ENFszJjQ_WYF4Sbz"></div>
+
       <input type="submit" value="Send" />
     </fieldset>
   </form>

@@ -47,6 +47,7 @@ def get_teams() -> List[str]:
             project["name"]
             for project in r_projects.json()["entities"]
             if project["name"] in env_teams
+            and "skip_test" not in project["description"]
         ]
     logging.info(teams)
     teams = [team for team in teams if team not in IGNORE]

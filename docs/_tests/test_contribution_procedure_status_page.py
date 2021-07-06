@@ -6,8 +6,7 @@ from requests_html import HTMLSession
 from typing import List
 
 GAPPS_URL = "https://script.google.com/macros/s/AKfycbwe9WgdWy_nsfyk1zC13pGc-ZnoJ4iRGvvJyIXZ2h4buI5MWLTL/exec"
-IGNORE = ["BME watermarked", "Donations"]
-
+SKIP_DESC_FLAG = "skip_status_page_test"
 
 def get_teams() -> List[str]:
     s = os.environ.get("SANITY_CHECKS_TEAMS")
@@ -41,15 +40,16 @@ def get_teams() -> List[str]:
             project["name"]
             for project in r_projects.json()["entities"]
             if project["name"] not in env_teams
+            and SKIP_DESC_FLAG not in project["description"]
         ]
     else:
         teams = [
             project["name"]
             for project in r_projects.json()["entities"]
             if project["name"] in env_teams
+            and SKIP_DESC_FLAG not in project["description"]
         ]
     logging.info(teams)
-    teams = [team for team in teams if team not in IGNORE]
     return teams
 
 

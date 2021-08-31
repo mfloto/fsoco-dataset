@@ -15,4 +15,6 @@ We will get in touch with you as soon as possible.
 
 #### I would like to contribute
 
-{% include contribution_form.html %}
+<p align="center">We are currently restructuring our internal workflow and hence do not accept new requests. We will be back in the fall. Please use the contact form above or send us an email for general inquiries.</p>
+
+

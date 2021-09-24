@@ -61,7 +61,14 @@ def convert_object_entry(
     image_height: float,
     class_id_mapping: dict,
     remove_watermark: bool,
+    exclude_tags: list,
 ):
+
+    tags = [tag["name"] for tag in obj["tags"]]
+
+    if any(tag in tags for tag in exclude_tags):
+        return None, None, None, None, None, None
+
     class_title = obj["classTitle"]
     class_id = class_id_mapping[class_title]
 
@@ -148,6 +155,7 @@ def convert_label(
     darknet_export_labels_dir: Path,
     class_id_mapping: dict,
     remove_watermark: bool,
+    exclude_tags: list,
     label: Path,
 ):
     class_counter = defaultdict(int)
@@ -182,19 +190,25 @@ def convert_label(
                             image_width=image_width,
                             class_id_mapping=class_id_mapping,
                             remove_watermark=remove_watermark,
+                            exclude_tags=exclude_tags,
                         )
 
-                        class_counter[class_title] += 1
+                        if class_id is None:
+                            class_counter["excluded_by_tag"] += 1
+                            continue
 
-                        darknet_label.write(
-                            "{} {} {} {} {}\n".format(
-                                class_id,
-                                norm_x,
-                                norm_y,
-                                norm_bb_width,
-                                norm_bb_height,
+                        else:
+                            class_counter[class_title] += 1
+
+                            darknet_label.write(
+                                "{} {} {} {} {}\n".format(
+                                    class_id,
+                                    norm_x,
+                                    norm_y,
+                                    norm_bb_width,
+                                    norm_bb_height,
+                                )
                             )
-                        )
                     except RuntimeWarning as e:
                         click.echo(
                             f"[Warning] Failed to convert object entry in {label_file_name} \n -> {e}"
@@ -203,7 +217,9 @@ def convert_label(
     return class_counter
 
 
-def main(sly_project_path: str, output_path: str, remove_watermark: bool):
+def main(
+    sly_project_path: str, output_path: str, remove_watermark: bool, exclude: list
+):
     class_id_mapping = fsoco_to_class_id_mapping()
 
     sly_base = Path(sly_project_path)
@@ -222,6 +238,7 @@ def main(sly_project_path: str, output_path: str, remove_watermark: bool):
         darknet_export_labels_dir,
         class_id_mapping,
         remove_watermark,
+        exclude,
     )
 
     global_class_counter = defaultdict(int)

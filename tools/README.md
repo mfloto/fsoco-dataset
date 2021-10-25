@@ -1,4 +1,15 @@
 # FSOCO Tools
+
+## Requirements
+
+The FSOCO Tools are __only supported on Linux__. There is no plan to include Windows support as there are some incompatible dependencies.
+
+The installation process is tested daily against Ubuntu 18.04, but any recent Linux installation should work. 
+
+- Linux OS
+- Python 3.7 (via Anaconda or virtualenv)
+- GPU [optional]
+
 ## Installation
 Create a new Python venv with your tool of choice. We'll be using Anaconda in this brief instruction.
 

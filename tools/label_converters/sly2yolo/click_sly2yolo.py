@@ -10,7 +10,7 @@ from .sly2yolo import main
 @click.option("--exclude", "-e", multiple=True)
 def sly2yolo(sly_project_folder, output_folder, remove_watermark, exclude):
     """
-     Supervisely  => Darknet YOLO format
+    Supervisely  => Darknet YOLO format
 
     https://docs.supervise.ly/ann_format/
 

@@ -25,7 +25,7 @@ jobs:
           pip install --editable .[sly]
 
       - name: Run sanity checks
-        run: fsoco sanity-checker -t ${{github.event.client_payload.team}} -w ${{github.event.client_payload.workspace}} -p  ${{github.event.client_payload.project}} --token ${{secrets.SLY_TOKEN}}
+        run: fsoco sanity-checker -t "${{github.event.client_payload.team}}" -w "${{github.event.client_payload.workspace}}" -p  "${{github.event.client_payload.project}}" --token ${{secrets.SLY_TOKEN}}
 
 #      - name: Upload results
 #        uses: actions/upload-artifact@v2

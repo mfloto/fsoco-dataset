@@ -1,7 +1,6 @@
-name: Label sanity checks - ${{github.event.client_payload.project}}
+name: Label sanity checks - triggered by a team
 
 on:
-  workflow_dispatch:
   repository_dispatch:
     types: [run_checks]
 
@@ -10,6 +9,9 @@ jobs:
     runs-on: ubuntu-18.04
 
     steps:
+      - name: Print team name to STDOUT
+        run: echo ${{github.event.client_payload.project}}
+
       - name: Check out repository
         uses: actions/checkout@v2
 

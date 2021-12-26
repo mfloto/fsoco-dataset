@@ -32,6 +32,6 @@ jobs:
       - name: Upload results
         uses: actions/upload-artifact@v2
         with:
-          name: sanity_checks
+          name: "${{github.event.client_payload.project}}"
           path: "results/${{github.event.client_payload.project}}.json"
           retention-days: 2

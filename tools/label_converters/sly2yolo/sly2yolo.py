@@ -116,25 +116,35 @@ def write_meta_data(
     num_labeled_images: int,
     class_counter: dict,
 ):
+
+    excluded_by_tag = class_counter.pop("excluded_by_tag", 0)
+
     # write class id mapping
 
     with open(darknet_export_base / "classes.txt", "w") as class_info_file:
 
         for class_name, _ in sorted(class_id_mapping.items(), key=lambda kv: kv[1]):
-            class_info_file.write("{}\n".format(class_name))
+            class_info_file.write(f"{class_name}\n")
 
     # write stats
 
-    print("Number of exported Images: {} ".format(num_labeled_images))
+    print(f"\nNumber of exported Images: {num_labeled_images} \n")
+    print("\n======================\n")
+    print("Objects per class:\n")
 
     for class_name, count in sorted(
         class_counter.items(), key=lambda kv: kv[1], reverse=True
     ):
         print(f"{class_name} -> {count}")
 
+    if excluded_by_tag > 0:
+        print("\n======================\n")
+        print(f"Number of objects excluded by tag -> {excluded_by_tag}\n")
+
     with open(darknet_export_base / "stats.txt", "w") as class_stat_file:
 
-        class_stat_file.write("Number of images: {}\n\n".format(num_labeled_images))
+        class_stat_file.write(f"\nNumber of images: {num_labeled_images}\n")
+        class_stat_file.write("\n======================\n")
         class_stat_file.write("Objects per class:\n")
 
         total_num_objects = 0
@@ -143,11 +153,15 @@ def write_meta_data(
             class_counter.items(), key=lambda kv: kv[1], reverse=True
         ):
             total_num_objects += count
-            class_stat_file.write("{} -> {}\n".format(class_name, count))
+            class_stat_file.write(f"{class_name} -> {count}\n")
 
-        class_stat_file.write(
-            "\nTotal number of objects: {}\n".format(total_num_objects)
-        )
+        class_stat_file.write(f"\nTotal number of objects: {total_num_objects}\n")
+
+        if excluded_by_tag > 0:
+            class_stat_file.write("\n======================\n")
+            class_stat_file.write(
+                f"Number of objects excluded by tag -> {excluded_by_tag}\n"
+            )
 
 
 def convert_label(

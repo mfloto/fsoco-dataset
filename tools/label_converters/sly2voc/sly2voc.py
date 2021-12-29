@@ -145,7 +145,9 @@ def handle_image(
     pascal_img_path = os.path.join(images_dir, no_ext_name + OUT_IMG_EXT)
     pascal_ann_path = os.path.join(anns_dir, no_ext_name + XML_EXT)
 
-    export_image(images_dir, Path(img_path), no_ext_name + OUT_IMG_EXT, remove_watermark)
+    export_image(
+        images_dir, Path(img_path), no_ext_name + OUT_IMG_EXT, remove_watermark
+    )
 
     ann = Annotation.load_json_file(ann_path, project_meta=project.meta)
 

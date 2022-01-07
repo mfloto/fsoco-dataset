@@ -7,15 +7,19 @@ from .sly2yolo import main
 @click.argument("sly_project_folder", type=str)
 @click.argument("output_folder", type=str)
 @click.option("--remove_watermark", is_flag=True, default=False)
-def sly2yolo(sly_project_folder, output_folder, remove_watermark):
+@click.option("--exclude", "-e", multiple=True)
+def sly2yolo(sly_project_folder, output_folder, remove_watermark, exclude):
     """
-     Supervisely  => Darknet YOLO format
+    Supervisely  => Darknet YOLO format
 
     https://docs.supervise.ly/ann_format/
 
     \b
     The mapping between Darknet class IDs and the class names we use in FSOCO can be adapted in this file:
     tools/label_converters/class_id_to_fsoco.yaml
+
+    \b
+    Use --exclude tag_name or -e tag_name to exclude objects with the specific tag.
 
     \b
     Input:
@@ -47,7 +51,7 @@ def sly2yolo(sly_project_folder, output_folder, remove_watermark):
 
     """
     click.echo("[LOG] Running Supervisely to  Darknet Yolo label converter")
-    main(sly_project_folder, output_folder, remove_watermark)
+    main(sly_project_folder, output_folder, remove_watermark, exclude)
 
 
 if __name__ == "__main__":

@@ -44,7 +44,7 @@ def iterate_project(
 ):
     # Create root pascal 'datasets' folders
     with tqdm(
-        total=get_total_num_images(project), desc="convertig labels", unit="images"
+        total=get_total_num_images(project), desc="converting labels", unit="images"
     ) as pbar:
         for dataset in project.datasets:
 
@@ -145,7 +145,9 @@ def handle_image(
     pascal_img_path = os.path.join(images_dir, no_ext_name + OUT_IMG_EXT)
     pascal_ann_path = os.path.join(anns_dir, no_ext_name + XML_EXT)
 
-    export_image(images_dir, img_path, no_ext_name + OUT_IMG_EXT, remove_watermark)
+    export_image(
+        images_dir, Path(img_path), no_ext_name + OUT_IMG_EXT, remove_watermark
+    )
 
     ann = Annotation.load_json_file(ann_path, project_meta=project.meta)
 

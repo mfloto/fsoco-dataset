@@ -61,7 +61,14 @@ def convert_object_entry(
     image_height: float,
     class_id_mapping: dict,
     remove_watermark: bool,
+    exclude_tags: list,
 ):
+
+    tags = [tag["name"] for tag in obj["tags"]]
+
+    if any(tag in tags for tag in exclude_tags):
+        return None, None, None, None, None, None
+
     class_title = obj["classTitle"]
     class_id = class_id_mapping[class_title]
 
@@ -109,25 +116,35 @@ def write_meta_data(
     num_labeled_images: int,
     class_counter: dict,
 ):
+
+    excluded_by_tag = class_counter.pop("excluded_by_tag", 0)
+
     # write class id mapping
 
     with open(darknet_export_base / "classes.txt", "w") as class_info_file:
 
         for class_name, _ in sorted(class_id_mapping.items(), key=lambda kv: kv[1]):
-            class_info_file.write("{}\n".format(class_name))
+            class_info_file.write(f"{class_name}\n")
 
     # write stats
 
-    print("Number of exported Images: {} ".format(num_labeled_images))
+    print(f"\nNumber of exported Images: {num_labeled_images} \n")
+    print("\n======================\n")
+    print("Objects per class:\n")
 
     for class_name, count in sorted(
         class_counter.items(), key=lambda kv: kv[1], reverse=True
     ):
         print(f"{class_name} -> {count}")
 
+    if excluded_by_tag > 0:
+        print("\n======================\n")
+        print(f"Number of objects excluded by tag -> {excluded_by_tag}\n")
+
     with open(darknet_export_base / "stats.txt", "w") as class_stat_file:
 
-        class_stat_file.write("Number of images: {}\n\n".format(num_labeled_images))
+        class_stat_file.write(f"\nNumber of images: {num_labeled_images}\n")
+        class_stat_file.write("\n======================\n")
         class_stat_file.write("Objects per class:\n")
 
         total_num_objects = 0
@@ -136,11 +153,15 @@ def write_meta_data(
             class_counter.items(), key=lambda kv: kv[1], reverse=True
         ):
             total_num_objects += count
-            class_stat_file.write("{} -> {}\n".format(class_name, count))
+            class_stat_file.write(f"{class_name} -> {count}\n")
 
-        class_stat_file.write(
-            "\nTotal number of objects: {}\n".format(total_num_objects)
-        )
+        class_stat_file.write(f"\nTotal number of objects: {total_num_objects}\n")
+
+        if excluded_by_tag > 0:
+            class_stat_file.write("\n======================\n")
+            class_stat_file.write(
+                f"Number of objects excluded by tag -> {excluded_by_tag}\n"
+            )
 
 
 def convert_label(
@@ -148,6 +169,7 @@ def convert_label(
     darknet_export_labels_dir: Path,
     class_id_mapping: dict,
     remove_watermark: bool,
+    exclude_tags: list,
     label: Path,
 ):
     class_counter = defaultdict(int)
@@ -182,19 +204,25 @@ def convert_label(
                             image_width=image_width,
                             class_id_mapping=class_id_mapping,
                             remove_watermark=remove_watermark,
+                            exclude_tags=exclude_tags,
                         )
 
-                        class_counter[class_title] += 1
+                        if class_id is None:
+                            class_counter["excluded_by_tag"] += 1
+                            continue
 
-                        darknet_label.write(
-                            "{} {} {} {} {}\n".format(
-                                class_id,
-                                norm_x,
-                                norm_y,
-                                norm_bb_width,
-                                norm_bb_height,
+                        else:
+                            class_counter[class_title] += 1
+
+                            darknet_label.write(
+                                "{} {} {} {} {}\n".format(
+                                    class_id,
+                                    norm_x,
+                                    norm_y,
+                                    norm_bb_width,
+                                    norm_bb_height,
+                                )
                             )
-                        )
                     except RuntimeWarning as e:
                         click.echo(
                             f"[Warning] Failed to convert object entry in {label_file_name} \n -> {e}"
@@ -203,7 +231,9 @@ def convert_label(
     return class_counter
 
 
-def main(sly_project_path: str, output_path: str, remove_watermark: bool):
+def main(
+    sly_project_path: str, output_path: str, remove_watermark: bool, exclude: list
+):
     class_id_mapping = fsoco_to_class_id_mapping()
 
     sly_base = Path(sly_project_path)
@@ -222,6 +252,7 @@ def main(sly_project_path: str, output_path: str, remove_watermark: bool):
         darknet_export_labels_dir,
         class_id_mapping,
         remove_watermark,
+        exclude,
     )
 
     global_class_counter = defaultdict(int)

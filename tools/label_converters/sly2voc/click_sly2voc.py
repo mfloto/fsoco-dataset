@@ -10,13 +10,9 @@ from .sly2voc import main
 @click.option("--merge", is_flag=True, default=False)
 def sly2voc(sly_project_folder, output_folder, remove_watermark, merge):
     """
-     Supervisely  => Darknet YOLO format
+    Supervisely  => Pascal VOC format
 
     https://docs.supervise.ly/ann_format/
-
-    \b
-    The mapping between Darknet class IDs and the class names we use in FSOCO can be adapted in this file:
-    tools/label_converters/class_id_to_fsoco.yaml
 
     \b
     Input:
@@ -34,17 +30,19 @@ def sly2voc(sly_project_folder, output_folder, remove_watermark, merge):
 
 
     \b
-    Output:
+    Output (if --merge, otherwise separate output for each dataset_name):
     output_folder
-    ├──images_folder
-       ├── img_x.jpeg
-       ├── img_y.jpeg
-       └── img_z.jpeg
-    └── darknet_labels_folder
-       ├── img_x.txt
-       ├── img_y.txt
-       └── img_z.txt
-
+    ├──JPEGImages
+    │  ├── img_x.jpeg
+    │  ├── img_y.jpeg
+    │  └── img_z.jpeg
+    ├── Annotations
+    │  ├── img_x.xml
+    │  ├── img_y.xml
+    │  └── img_z.xml
+    └── ImageSets
+        └── Layout
+            └── <empty>
 
     """
     click.echo("[LOG] Running Supervisely to Pascal VOC label converter")

@@ -60,8 +60,8 @@ def zip_dataset(project_dir: str, zipfile_name: str, dataset_blacklist: List[str
                     pbar.update(1)
 
 
-def upload_zipfile(zipfile_name: str, drive_folder_id: str):
-    assert os.path.exists(zipfile_name)
+def upload_file(file_name: str, drive_folder_id: str):
+    assert os.path.exists(file_name)
 
     gauth = GoogleAuth()
     if os.path.exists("credentials.txt"):
@@ -73,24 +73,50 @@ def upload_zipfile(zipfile_name: str, drive_folder_id: str):
 
     file_drive = drive.ListFile(
         {
-            "q": f'"{drive_folder_id}" in parents and title contains "{zipfile_name}" and trashed=false'
+            "q": f'"{drive_folder_id}" in parents and title contains "{file_name}" and trashed=false'
         }
     ).GetList()
     assert len(file_drive) <= 1
 
     if not file_drive:
         file_drive = drive.CreateFile(
-            {"title": zipfile_name, "parents": [{"id": drive_folder_id}]}
+            {"title": file_name, "parents": [{"id": drive_folder_id}]}
         )
     else:
         file_drive = file_drive[0]
     prev_revision_id = file_drive.get("headRevisionId", "")
 
-    print(f"Uploading zip file: {zipfile_name}")
-    file_drive.SetContentFile(zipfile_name)
+    print(f"Uploading zip file: {file_name}")
+    file_drive.SetContentFile(file_name)
     file_drive.Upload()
 
     assert file_drive["headRevisionId"] != prev_revision_id
+
+
+def update_stats(project_dir: str, cache_dir: str):
+    cmd = f"fsoco collect-stats {project_dir} --cache_dir {cache_dir}"
+    if "Segmentation" not in project_dir:
+        cmd += " --calc_similarity --gpu --num_workers 4"
+    os.system(cmd)
+
+    if "Segmentation" in project_dir:
+        os.rename(
+            os.path.join(cache_dir, "bboxes_train_bbox_stats.df"),
+            os.path.join(cache_dir, "Segmentation-BBoxes_bbox_stats.df"),
+        )
+        os.rename(
+            os.path.join(cache_dir, "bboxes_train_image_stats.df"),
+            os.path.join(cache_dir, "Segmentation-BBoxes_image_stats.df"),
+        )
+    else:
+        os.rename(
+            os.path.join(cache_dir, "bboxes_train_bbox_stats.df"),
+            os.path.join(cache_dir, "Bounding_Boxes-train_bbox_stats.df"),
+        )
+        os.rename(
+            os.path.join(cache_dir, "bboxes_train_image_stats.df"),
+            os.path.join(cache_dir, "Bounding_Boxes-train_image_stats.df"),
+        )
 
 
 def main(sly_token: str, download_path: str):
@@ -101,38 +127,44 @@ def main(sly_token: str, download_path: str):
             "sly_project": "Bounding_Boxes-train",
             "zipfile": "fsoco_bounding_boxes_train.zip",
         },
-        "bboxes_test": {
-            "sly_project": "Bounding_Boxes-test",
-            "zipfile": "fsoco_bounding_boxes_test.zip",
-        },
-#         "segmentation_train": {
-#             "sly_project": "Segmentation",
-#             "zipfile": "fsoco_segmentation_train.zip",
-#         },
-#         "segmentation_early_adopters": {
-#             "sly_project": "Segmentation",
-#             "zipfile": "fsoco_segmentation_early_adopters.zip",
-#             "dataset_blacklist": ["tuwr", "fsb", "orion", "msm"],
-#         },
+        # "bboxes_test": {
+        #     "sly_project": "Bounding_Boxes-test",
+        #     "zipfile": "fsoco_bounding_boxes_test.zip",
+        # },
+        # "segmentation_train": {
+        #     "sly_project": "Segmentation",
+        #     "zipfile": "fsoco_segmentation_train.zip",
+        # },
+        # "segmentation_early_adopters": {
+        #     "sly_project": "Segmentation",
+        #     "zipfile": "fsoco_segmentation_early_adopters.zip",
+        #     "dataset_blacklist": ["tuwr", "fsb", "orion", "msm"],
+        # },
     }
-    drive_folder_id = "1P0TiljS1RCaqdbKGFqju2W4_Drxd-_GI"
+    DRIVE_DATA_FOLDER_ID = "1P0TiljS1RCaqdbKGFqju2W4_Drxd-_GI"
 
-    for project_config in projects.values():
-        os.makedirs(download_path)
+    for project_name, project_config in projects.items():
+        project_path = os.path.join(download_path, project_name)
+
+        os.makedirs(project_path, exist_ok=True)
 
         download_dataset(
             sly_token,
             sly_team,
             sly_workspace,
             project_config["sly_project"],
-            download_path,
+            project_path,
         )
         dataset_blacklist = project_config.get("dataset_blacklist", [])
-        zip_dataset(download_path, project_config["zipfile"], dataset_blacklist)
-        # upload_zipfile(project_config["zipfile"], drive_folder_id)
+        zip_dataset(project_path, project_config["zipfile"], dataset_blacklist)
+
+        # The connection gets interrupted for such big files
+        # upload_zipfile(project_config["zipfile"], DRIVE_DATA_FOLDER_ID)
+
+        update_stats(project_path, download_path)
 
         # os.remove(project_config["zipfile"])
-        shutil.rmtree(download_path)
+        # shutil.rmtree(project_path)
 
         print("-" * 40)
 

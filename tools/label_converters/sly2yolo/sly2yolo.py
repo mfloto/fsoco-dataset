@@ -135,15 +135,8 @@ def convert_object_entry_segmentation(
         mask = cv2.imdecode(n, cv2.IMREAD_UNCHANGED)[..., 3]
 
         contours, _ = cv2.findContours(mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        contours = np.array(contours)
-        contours = contours[0]
-        try:
-            contours += obj["bitmap"]["origin"]
-        except:
-            print(mask)
-            print(obj["bitmap"]["origin"])
-            print(contours)
-            print(contours.shape)
+        contours = np.vstack(contours)
+        contours += obj["bitmap"]["origin"]
 
         if remove_watermark:
             contours -= FSOCO_IMPORT_BORDER_THICKNESS

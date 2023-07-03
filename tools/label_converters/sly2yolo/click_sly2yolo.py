@@ -7,8 +7,9 @@ from .sly2yolo import main
 @click.argument("sly_project_folder", type=str)
 @click.argument("output_folder", type=str)
 @click.option("--remove_watermark", is_flag=True, default=False)
+@click.option("--segmentation", "-s", is_flag=True, default=False)
 @click.option("--exclude", "-e", multiple=True)
-def sly2yolo(sly_project_folder, output_folder, remove_watermark, exclude):
+def sly2yolo(sly_project_folder, output_folder, remove_watermark, segmentation, exclude):
     """
     Supervisely  => Darknet YOLO format
 
@@ -51,7 +52,7 @@ def sly2yolo(sly_project_folder, output_folder, remove_watermark, exclude):
 
     """
     click.echo("[LOG] Running Supervisely to  Darknet Yolo label converter")
-    main(sly_project_folder, output_folder, remove_watermark, exclude)
+    main(sly_project_folder, output_folder, remove_watermark, segmentation, exclude)
 
 
 if __name__ == "__main__":

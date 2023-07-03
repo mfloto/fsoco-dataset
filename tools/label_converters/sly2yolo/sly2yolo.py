@@ -124,7 +124,7 @@ def convert_object_entry_segmentation(
     tags = [tag["name"] for tag in obj["tags"]]
 
     if any(tag in tags for tag in exclude_tags):
-        return None, None, None, None, None, None
+        return None, None
 
     class_title = obj["classTitle"]
     class_id = class_id_mapping[class_title]

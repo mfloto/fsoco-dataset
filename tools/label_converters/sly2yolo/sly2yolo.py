@@ -11,7 +11,6 @@ from functools import partial
 import zlib
 import base64
 import numpy as np
-import cv2
 
 from ..helpers import fsoco_to_class_id_mapping
 from watermark.watermark import FSOCO_IMPORT_BORDER_THICKNESS
@@ -131,9 +130,9 @@ def convert_object_entry_segmentation(
 
     z = zlib.decompress(base64.b64decode(obj["bitmap"]["data"]))
     n = np.fromstring(z, np.uint8)
-    mask = cv2.imdecode(n, cv2.IMREAD_UNCHANGED)[..., 3]
+    mask = cv.imdecode(n, cv.IMREAD_UNCHANGED)[..., 3]
 
-    contours, _ = cv2.findContours(mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv.findContours(mask.astype(np.uint8), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     contours = np.vstack(contours)
     contours += obj["bitmap"]["origin"]
 

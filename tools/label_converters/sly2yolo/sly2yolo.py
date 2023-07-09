@@ -228,7 +228,32 @@ def convert_label(
 
                 for obj in data["objects"]:
                     try:
-                        if not segmentation:
+                        if segmentation:
+                            (
+                                class_id,
+                                class_title,
+                                segmentation_mask,
+                            ) = convert_object_entry_segmentation(
+                                obj,
+                                image_height=image_height,
+                                image_width=image_width,
+                                class_id_mapping=class_id_mapping,
+                                remove_watermark=remove_watermark,
+                                exclude_tags=exclude_tags,
+                            )
+
+                            if class_id is None:
+                                class_counter["excluded_by_tag"] += 1
+                                continue
+
+                            else:
+                                class_counter[class_title] += 1
+
+                                darknet_label.write(
+                                    "{} {}\n".format(class_id, ' '.join(
+                                        [' '.join(map(str, row[0])) for row in list(segmentation_mask)]))
+                                )
+                        else:
                             (
                                 class_id,
                                 class_title,
@@ -260,31 +285,6 @@ def convert_label(
                                         norm_bb_width,
                                         norm_bb_height,
                                     )
-                                )
-                        else:
-                            (
-                                class_id,
-                                class_title,
-                                segmentation_mask,
-                            ) = convert_object_entry_segmentation(
-                                obj,
-                                image_height=image_height,
-                                image_width=image_width,
-                                class_id_mapping=class_id_mapping,
-                                remove_watermark=remove_watermark,
-                                exclude_tags=exclude_tags,
-                            )
-
-                            if class_id is None:
-                                class_counter["excluded_by_tag"] += 1
-                                continue
-
-                            else:
-                                class_counter[class_title] += 1
-
-                                darknet_label.write(
-                                    "{} {}\n".format(class_id, ' '.join(
-                                        [' '.join(map(str, row[0])) for row in list(segmentation_mask)]))
                                 )
                     except RuntimeWarning as e:
                         click.echo(

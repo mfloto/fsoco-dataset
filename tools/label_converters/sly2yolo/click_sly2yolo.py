@@ -9,7 +9,9 @@ from .sly2yolo import main
 @click.option("--remove_watermark", is_flag=True, default=False)
 @click.option("--segmentation", "-s", is_flag=True, default=False)
 @click.option("--exclude", "-e", multiple=True)
-def sly2yolo(sly_project_folder, output_folder, remove_watermark, segmentation, exclude):
+def sly2yolo(
+    sly_project_folder, output_folder, remove_watermark, segmentation, exclude
+):
     """
     Supervisely  => Darknet YOLO format
 

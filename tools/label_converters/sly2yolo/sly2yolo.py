@@ -24,10 +24,10 @@ def clean_export_dir(darknet_export_images_dir: Path, darknet_export_labels_dir:
 
 
 def export_image(
-        darknet_export_images_dir: Path,
-        src_file: Path,
-        new_file_name: str,
-        remove_watermark: bool,
+    darknet_export_images_dir: Path,
+    src_file: Path,
+    new_file_name: str,
+    remove_watermark: bool,
 ):
     if remove_watermark:
         rescale_copy_image(darknet_export_images_dir, src_file, new_file_name)
@@ -45,26 +45,26 @@ def copy_image(darknet_export_images_dir: Path, src_file: Path, new_file_name: s
 
 
 def rescale_copy_image(
-        darknet_export_images_dir: Path, src_file: Path, new_file_name: str
+    darknet_export_images_dir: Path, src_file: Path, new_file_name: str
 ):
     image = cv.imread(str(src_file))
     cropped_image = image[
-                    FSOCO_IMPORT_BORDER_THICKNESS:-FSOCO_IMPORT_BORDER_THICKNESS,
-                    FSOCO_IMPORT_BORDER_THICKNESS:-FSOCO_IMPORT_BORDER_THICKNESS,
-                    :,
-                    ]
+        FSOCO_IMPORT_BORDER_THICKNESS:-FSOCO_IMPORT_BORDER_THICKNESS,
+        FSOCO_IMPORT_BORDER_THICKNESS:-FSOCO_IMPORT_BORDER_THICKNESS,
+        :,
+    ]
 
     new_dst_file_name = darknet_export_images_dir / new_file_name
     cv.imwrite(str(new_dst_file_name), cropped_image)
 
 
 def convert_object_entry(
-        obj: dict,
-        image_width: float,
-        image_height: float,
-        class_id_mapping: dict,
-        remove_watermark: bool,
-        exclude_tags: list,
+    obj: dict,
+    image_width: float,
+    image_height: float,
+    class_id_mapping: dict,
+    remove_watermark: bool,
+    exclude_tags: list,
 ):
     tags = [tag["name"] for tag in obj["tags"]]
 
@@ -99,10 +99,10 @@ def convert_object_entry(
     norm_bb_height = bb_height / image_height
 
     if not (
-            (0 <= norm_x <= 1)
-            or (0 <= norm_y <= 1)
-            or (0 <= norm_bb_width <= 1)
-            or (0 <= norm_bb_height <= 1)
+        (0 <= norm_x <= 1)
+        or (0 <= norm_y <= 1)
+        or (0 <= norm_bb_width <= 1)
+        or (0 <= norm_bb_height <= 1)
     ):
         raise RuntimeWarning(
             f"Normalized bounding box values outside the valid range! "
@@ -113,12 +113,12 @@ def convert_object_entry(
 
 
 def convert_object_entry_segmentation(
-        obj: dict,
-        image_width: float,
-        image_height: float,
-        class_id_mapping: dict,
-        remove_watermark: bool,
-        exclude_tags: list,
+    obj: dict,
+    image_width: float,
+    image_height: float,
+    class_id_mapping: dict,
+    remove_watermark: bool,
+    exclude_tags: list,
 ):
     tags = [tag["name"] for tag in obj["tags"]]
 
@@ -132,7 +132,9 @@ def convert_object_entry_segmentation(
     n = np.fromstring(z, np.uint8)
     mask = cv.imdecode(n, cv.IMREAD_UNCHANGED)[..., 3]
 
-    contours, _ = cv.findContours(mask.astype(np.uint8), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv.findContours(
+        mask.astype(np.uint8), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE
+    )
     contours = np.vstack(contours)
     contours += obj["bitmap"]["origin"]
 
@@ -148,10 +150,10 @@ def convert_object_entry_segmentation(
 
 
 def write_meta_data(
-        darknet_export_base: Path,
-        class_id_mapping: dict,
-        num_labeled_images: int,
-        class_counter: dict,
+    darknet_export_base: Path,
+    class_id_mapping: dict,
+    num_labeled_images: int,
+    class_counter: dict,
 ):
     excluded_by_tag = class_counter.pop("excluded_by_tag", 0)
 
@@ -169,7 +171,7 @@ def write_meta_data(
     print("Objects per class:\n")
 
     for class_name, count in sorted(
-            class_counter.items(), key=lambda kv: kv[1], reverse=True
+        class_counter.items(), key=lambda kv: kv[1], reverse=True
     ):
         print(f"{class_name} -> {count}")
 
@@ -186,7 +188,7 @@ def write_meta_data(
         total_num_objects = 0
 
         for class_name, count in sorted(
-                class_counter.items(), key=lambda kv: kv[1], reverse=True
+            class_counter.items(), key=lambda kv: kv[1], reverse=True
         ):
             total_num_objects += count
             class_stat_file.write(f"{class_name} -> {count}\n")
@@ -201,13 +203,13 @@ def write_meta_data(
 
 
 def convert_label(
-        darknet_export_images_dir: Path,
-        darknet_export_labels_dir: Path,
-        class_id_mapping: dict,
-        remove_watermark: bool,
-        segmentation: bool,
-        exclude_tags: list,
-        label: Path,
+    darknet_export_images_dir: Path,
+    darknet_export_labels_dir: Path,
+    class_id_mapping: dict,
+    remove_watermark: bool,
+    segmentation: bool,
+    exclude_tags: list,
+    label: Path,
 ):
     class_counter = defaultdict(int)
     name = label.stem
@@ -250,8 +252,15 @@ def convert_label(
                                 class_counter[class_title] += 1
 
                                 darknet_label.write(
-                                    "{} {}\n".format(class_id, ' '.join(
-                                        [' '.join(map(str, row[0])) for row in list(segmentation_mask)]))
+                                    "{} {}\n".format(
+                                        class_id,
+                                        " ".join(
+                                            [
+                                                " ".join(map(str, row[0]))
+                                                for row in list(segmentation_mask)
+                                            ]
+                                        ),
+                                    )
                                 )
                         else:
                             (
@@ -295,7 +304,11 @@ def convert_label(
 
 
 def main(
-        sly_project_path: str, output_path: str, remove_watermark: bool, segmentation: bool, exclude: list
+    sly_project_path: str,
+    output_path: str,
+    remove_watermark: bool,
+    segmentation: bool,
+    exclude: list,
 ):
     class_id_mapping = fsoco_to_class_id_mapping()
 
@@ -323,7 +336,7 @@ def main(
 
     with Pool() as p:
         for class_counter in tqdm.tqdm(
-                p.imap_unordered(convert_func, labels), total=len(labels)
+            p.imap_unordered(convert_func, labels), total=len(labels)
         ):
             for class_name, count in class_counter.items():
                 global_class_counter[class_name] += count

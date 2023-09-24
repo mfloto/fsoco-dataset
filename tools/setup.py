@@ -33,7 +33,7 @@ setup(
         "opencv-python",
         "tqdm",
         "pillow>=6.2.1",
-        "click>=7.0.0",
+        "click>=7.0.0<=8.0.4",
         "pyyaml>=5.0.0",
         "numpy",
         "scipy",

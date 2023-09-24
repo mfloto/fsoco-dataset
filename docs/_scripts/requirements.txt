@@ -9,7 +9,7 @@ holoviews==1.13
 bokeh==2.0
 pandas==1.4.2
 matplotlib==3.3.2
-scipy==1.5.2
+scipy==1.10.0
 requests
 lxml
 PyDrive

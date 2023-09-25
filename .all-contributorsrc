@@ -37,6 +37,15 @@
         "doc",
         "tool"
       ]
+    },
+    {
+      "login": "mfloto",
+      "name": "Maxi(milian?) ",
+      "avatar_url": "https://avatars.githubusercontent.com/u/60036186?v=4",
+      "profile": "https://github.com/mfloto",
+      "contributions": [
+        "tool"
+      ]
     }
   ],
   "contributorsPerLine": 7,

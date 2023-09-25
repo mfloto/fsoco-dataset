@@ -8,6 +8,9 @@ import cv2 as cv
 from multiprocessing import Pool
 import tqdm
 from functools import partial
+import zlib
+import base64
+import numpy as np
 
 from ..helpers import fsoco_to_class_id_mapping
 from watermark.watermark import FSOCO_IMPORT_BORDER_THICKNESS
@@ -63,7 +66,6 @@ def convert_object_entry(
     remove_watermark: bool,
     exclude_tags: list,
 ):
-
     tags = [tag["name"] for tag in obj["tags"]]
 
     if any(tag in tags for tag in exclude_tags):
@@ -110,13 +112,49 @@ def convert_object_entry(
     return class_id, class_title, norm_x, norm_y, norm_bb_width, norm_bb_height
 
 
+def convert_object_entry_segmentation(
+    obj: dict,
+    image_width: float,
+    image_height: float,
+    class_id_mapping: dict,
+    remove_watermark: bool,
+    exclude_tags: list,
+):
+    tags = [tag["name"] for tag in obj["tags"]]
+
+    if any(tag in tags for tag in exclude_tags):
+        return None, None
+
+    class_title = obj["classTitle"]
+    class_id = class_id_mapping[class_title]
+
+    z = zlib.decompress(base64.b64decode(obj["bitmap"]["data"]))
+    n = np.fromstring(z, np.uint8)
+    mask = cv.imdecode(n, cv.IMREAD_UNCHANGED)[..., 3]
+
+    contours, _ = cv.findContours(
+        mask.astype(np.uint8), cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE
+    )
+    contours = np.vstack(contours)
+    contours += obj["bitmap"]["origin"]
+
+    if remove_watermark:
+        contours -= FSOCO_IMPORT_BORDER_THICKNESS
+        image_width -= 2 * FSOCO_IMPORT_BORDER_THICKNESS
+        image_height -= 2 * FSOCO_IMPORT_BORDER_THICKNESS
+
+    # normalize contours
+    contours = contours / np.array([image_width, image_height])
+
+    return class_id, class_title, contours
+
+
 def write_meta_data(
     darknet_export_base: Path,
     class_id_mapping: dict,
     num_labeled_images: int,
     class_counter: dict,
 ):
-
     excluded_by_tag = class_counter.pop("excluded_by_tag", 0)
 
     # write class id mapping
@@ -169,6 +207,7 @@ def convert_label(
     darknet_export_labels_dir: Path,
     class_id_mapping: dict,
     remove_watermark: bool,
+    segmentation: bool,
     exclude_tags: list,
     label: Path,
 ):
@@ -191,38 +230,71 @@ def convert_label(
 
                 for obj in data["objects"]:
                     try:
-                        (
-                            class_id,
-                            class_title,
-                            norm_x,
-                            norm_y,
-                            norm_bb_width,
-                            norm_bb_height,
-                        ) = convert_object_entry(
-                            obj,
-                            image_height=image_height,
-                            image_width=image_width,
-                            class_id_mapping=class_id_mapping,
-                            remove_watermark=remove_watermark,
-                            exclude_tags=exclude_tags,
-                        )
-
-                        if class_id is None:
-                            class_counter["excluded_by_tag"] += 1
-                            continue
-
-                        else:
-                            class_counter[class_title] += 1
-
-                            darknet_label.write(
-                                "{} {} {} {} {}\n".format(
-                                    class_id,
-                                    norm_x,
-                                    norm_y,
-                                    norm_bb_width,
-                                    norm_bb_height,
-                                )
+                        if segmentation:
+                            (
+                                class_id,
+                                class_title,
+                                segmentation_mask,
+                            ) = convert_object_entry_segmentation(
+                                obj,
+                                image_height=image_height,
+                                image_width=image_width,
+                                class_id_mapping=class_id_mapping,
+                                remove_watermark=remove_watermark,
+                                exclude_tags=exclude_tags,
                             )
+
+                            if class_id is None:
+                                class_counter["excluded_by_tag"] += 1
+                                continue
+
+                            else:
+                                class_counter[class_title] += 1
+
+                                darknet_label.write(
+                                    "{} {}\n".format(
+                                        class_id,
+                                        " ".join(
+                                            [
+                                                " ".join(map(str, row[0]))
+                                                for row in list(segmentation_mask)
+                                            ]
+                                        ),
+                                    )
+                                )
+                        else:
+                            (
+                                class_id,
+                                class_title,
+                                norm_x,
+                                norm_y,
+                                norm_bb_width,
+                                norm_bb_height,
+                            ) = convert_object_entry(
+                                obj,
+                                image_height=image_height,
+                                image_width=image_width,
+                                class_id_mapping=class_id_mapping,
+                                remove_watermark=remove_watermark,
+                                exclude_tags=exclude_tags,
+                            )
+
+                            if class_id is None:
+                                class_counter["excluded_by_tag"] += 1
+                                continue
+
+                            else:
+                                class_counter[class_title] += 1
+
+                                darknet_label.write(
+                                    "{} {} {} {} {}\n".format(
+                                        class_id,
+                                        norm_x,
+                                        norm_y,
+                                        norm_bb_width,
+                                        norm_bb_height,
+                                    )
+                                )
                     except RuntimeWarning as e:
                         click.echo(
                             f"[Warning] Failed to convert object entry in {label_file_name} \n -> {e}"
@@ -232,7 +304,11 @@ def convert_label(
 
 
 def main(
-    sly_project_path: str, output_path: str, remove_watermark: bool, exclude: list
+    sly_project_path: str,
+    output_path: str,
+    remove_watermark: bool,
+    segmentation: bool,
+    exclude: list,
 ):
     class_id_mapping = fsoco_to_class_id_mapping()
 
@@ -252,6 +328,7 @@ def main(
         darknet_export_labels_dir,
         class_id_mapping,
         remove_watermark,
+        segmentation,
         exclude,
     )
 
